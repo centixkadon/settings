@@ -1,0 +1,27 @@
+{
+  "editor.tabSize": 2,
+  "[python]": {
+    "editor.tabSize": 4
+  },
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.wordWrap": "on",
+  "editor.wordWrapColumn": 80,
+  "editor.wrappingIndent": "indent",
+  "editor.formatOnType": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.renderWhitespace": "boundary",
+  "window.restoreWindows": "all",
+  "window.newWindowDimensions": "maximized",
+  "python.linting.enabled": true,
+  "python.linting.lintOnSave": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": [
+    "--max-line-length=120"
+  ],
+  "python.formatting.provider": "none",
+  "C_Cpp.clang_format_fallbackStyle": "{ AllowShortBlocksOnASingleLine: true, AllowShortCaseLabelsOnASingleLine: true, AllowShortFunctionsOnASingleLine: All, AllowShortIfStatementsOnASingleLine: true, AllowShortLoopsOnASingleLine: true, ColumnLimit: 0, IndentWidth: 2, ContinuationIndentWidth: 2, MaxEmptyLinesToKeep: 3, PointerAlignment: Middle }",
+  "workbench.colorTheme": "Default Light+"
+}
