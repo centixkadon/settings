@@ -12,8 +12,13 @@
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "editor.renderWhitespace": "boundary",
+  "workbench.colorTheme": "Default Light+",
   "window.restoreWindows": "all",
   "window.newWindowDimensions": "maximized",
+  "window.title": "${dirty}${rootName}${separator}${rootPath}${separator}${activeEditorShort}${separator}${appName}",
+  "explorer.confirmDragAndDrop": false,
+  "telemetry.enableCrashReporter": false,
+  "telemetry.enableTelemetry": false,
   "python.linting.enabled": true,
   "python.linting.lintOnSave": true,
   "python.linting.pylintEnabled": false,
@@ -22,6 +27,8 @@
     "--max-line-length=120"
   ],
   "python.formatting.provider": "none",
-  "C_Cpp.clang_format_fallbackStyle": "{ AllowShortBlocksOnASingleLine: true, AllowShortCaseLabelsOnASingleLine: true, AllowShortFunctionsOnASingleLine: All, AllowShortIfStatementsOnASingleLine: true, AllowShortLoopsOnASingleLine: true, ColumnLimit: 0, IndentWidth: 2, ContinuationIndentWidth: 2, MaxEmptyLinesToKeep: 3, PointerAlignment: Middle }",
-  "workbench.colorTheme": "Default Light+"
+  "C_Cpp.clang_format_fallbackStyle": "{ AllowShortBlocksOnASingleLine: true, AllowShortCaseLabelsOnASingleLine: true, AllowShortFunctionsOnASingleLine: All, AllowShortIfStatementsOnASingleLine: true, AllowShortLoopsOnASingleLine: true, ColumnLimit: 0, Cpp11BracedListStyle: false, IndentWidth: 2, ContinuationIndentWidth: 2, ConstructorInitializerIndentWidth: 2, MaxEmptyLinesToKeep: 3, PointerAlignment: Middle, SpacesInContainerLiterals: true }",
+  "cmake.cmakePath": "D:/Portable/CMake/cmake-3.10.2-win64-x64/bin/cmake.exe",
+  "matlab.matlabpath": "C:/Programs/MathWorks/MATLAB/R2016b/bin/matlab.exe",
+  "matlab.mlintpath": "C:/Programs/MathWorks/MATLAB/R2016b/bin/win64/mlint.exe"
 }
