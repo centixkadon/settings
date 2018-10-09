@@ -1,0 +1,10 @@
+type: s
+
+shadowsocks:
+  address: 127.0.0.1:11110
+
+manager:
+  address: 127.0.0.1:11111
+  password: '1234qwerASDF'
+
+db: 'sscount.sqlite'
