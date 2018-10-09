@@ -1,0 +1,37 @@
+#!/bin/bash
+
+PROCESSES=$(nvidia-smi)
+PROCESSES=$(tail -n +19 <<< $(head -n -1 <<< ${PROCESSES}))
+PROCESSES=$(sort <<< ${PROCESSES})
+
+declare -A PROCESSES_GPUS=()
+while read PROCESS
+do
+  PROCESS_PROPERTIES=(${PROCESS})
+  PROCESS_GPU=${PROCESS_PROPERTIES[1]}
+  PROCESS_PID=${PROCESS_PROPERTIES[2]}
+  PROCESSES_GPUS[${PROCESS_PID}]+=${PROCESS_GPU}
+done <<< ${PROCESSES}
+
+
+PROCESSES=$(ps -ef)
+PROCESSES_HEAD=$(head -n 1 <<< ${PROCESSES})
+PROCESSES=$(tail -n +2 <<< ${PROCESSES})
+# PROCESSES=$(grep pts <<< ${PROCESSES})
+PROCESSES=$(sort <<< ${PROCESSES})
+
+echo "GPU ${PROCESSES_HEAD}"
+while read PROCESS
+do
+  PROCESS_PROPERTIES=(${PROCESS})
+  PROCESS_PID=${PROCESS_PROPERTIES[1]}
+  PROCESS_TTY=${PROCESS_PROPERTIES[5]}
+  PROCESS_CMD=${PROCESS_PROPERTIES[@]:7}
+  if [ "${PROCESS_TTY:0:4}" != "pts/" ]; then continue; fi
+  if [ "${PROCESS_CMD:0:6}" == "sshd: " ]; then continue; fi
+  if [ "${PROCESS_CMD:0:6}" == "ps -ef" ]; then continue; fi
+  PROCESS_GPU="   ${PROCESSES_GPUS[${PROCESS_PID}]}"
+  PROCESS_GPU=${PROCESS_GPU:0-3}
+  echo "${PROCESS_GPU} ${PROCESS}"
+done <<< ${PROCESSES}
+

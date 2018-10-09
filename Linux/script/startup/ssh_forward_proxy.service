@@ -1,0 +1,12 @@
+[Unit]
+Description=ssh_forward_proxy
+After=network.target
+
+[Service]
+User=${USER}
+Group=${GROUP}
+ExecStart=autossh -gfCNL ${PORT_LOCAL}:${HOST_REMOTE}:${PORT_REMOTE} ${SSH_USER}@127.0.0.1 -p ${SSH_PORT}
+ExecStop=
+
+[Install]
+WantedBy=multi-user.target

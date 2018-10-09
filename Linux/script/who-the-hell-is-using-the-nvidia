@@ -1,0 +1,35 @@
+#!/bin/bash
+
+PROCESSES=$(ps -ef)
+PROCESSES_HEAD=$(head -n 1 <<< ${PROCESSES})
+PROCESSES=$(tail -n +2 <<< ${PROCESSES})
+PROCESSES=$(sort <<< ${PROCESSES})
+
+declare -A PROCESS_UIDS=()
+while read PROCESS
+do
+  PROCESS_PROPERTIES=(${PROCESS})
+  PROCESS_UID=${PROCESS_PROPERTIES[0]}
+  PROCESS_PID=${PROCESS_PROPERTIES[1]}
+  PROCESS_UIDS[${PROCESS_PID}]=${PROCESS_UID}
+done <<< ${PROCESSES}
+
+
+PROCESSES=$(nvidia-smi)
+PROCESSES_HEAD_1=$(head -n 17 <<< ${PROCESSES})
+PROCESSES_HEAD_2=$(head -n 1 <<< $(tail -n +18 <<< ${PROCESSES}))
+PROCESSES_TAIL=$(tail -n 1 <<< ${PROCESSES})
+PROCESSES=$(tail -n +19 <<< $(head -n -1 <<< ${PROCESSES}))
+PROCESSES=$(sort <<< ${PROCESSES})
+
+echo "${PROCESSES_HEAD_1} UID"
+echo "${PROCESSES_HEAD_2}=========="
+while read PROCESS
+do
+  PROCESS_PROPERTIES=(${PROCESS})
+  PROCESS_PID=${PROCESS_PROPERTIES[2]}
+  PROCESS_UID=${PROCESS_UIDS[${PROCESS_PID}]}
+  echo "${PROCESS} ${PROCESS_UID}"
+done <<< ${PROCESSES}
+echo "${PROCESSES_TAIL}"
+

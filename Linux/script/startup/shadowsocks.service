@@ -1,0 +1,12 @@
+[Unit]
+Description=shadowsocks
+After=network.target
+
+[Service]
+User=${USER}
+Group=${GROUP}
+ExecStart=/etc/shadowsocks/shadowsocks.sh start
+ExecStop=
+
+[Install]
+WantedBy=multi-user.target

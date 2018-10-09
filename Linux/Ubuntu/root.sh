@@ -1,4 +1,11 @@
 #!/bin/bash
+# Download this script using bash:
+#   wget -c https://raw.githubusercontent.com/centixkadon/settings/master/Linux/Ubuntu/root.sh
+#   chmod +x root.sh
+#   ./root.sh
+
+WARNH=$(echo -e "\033[0;1;31m")
+WARNT=$(echo -e "\033[0m")
 
 if [ "$(whoami)" == "root" ]
 then # setup for root
@@ -6,7 +13,6 @@ then # setup for root
 # update && upgrade
 
 apt update
-apt upgrade --fix-missing
 apt upgrade --fix-missing
 apt upgrade --fix-missing
 
@@ -20,7 +26,7 @@ read -p "SSH port (${SSH_PORT_DEFAULT}): " SSH_PORT
 SSH_PORT=${SSH_PORT%% *}
 SSH_PORT=${SSH_PORT%%.*}
 SSH_PORT=${SSH_PORT:-${SSH_PORT_DEFAULT}}
-echo "[Info] SSH port: ${SSH_PORT}"
+echo "${WARNH}[Info] SSH port: ${SSH_PORT}${WARNT}"
 echo
 
 sed -ri.bak 's/ *#? *Port +[0-9]+/Port '${SSH_PORT}'/' /etc/ssh/sshd_config
@@ -30,16 +36,16 @@ sed -ri.bak 's/ *#? *Port +[0-9]+/Port '${SSH_PORT}'/' /etc/ssh/sshd_config
 # first user && group
 
 USER_DEFAULT=cxd
-read -p "First user (${USER_DEFAULT}): " SUDO_USER
+read -p "First user (${USER_DEFAULT}) or press Ctrl+C to exit: " SUDO_USER
 SUDO_USER=${SUDO_USER%% *}
 SUDO_USER=${SUDO_USER:-${USER_DEFAULT}}
-echo "[Info] User: ${SUDO_USER}"
+echo "${WARNH}[Info] User: ${SUDO_USER}${WARNT}"
 echo
 
 read -p "First group (${SUDO_USER}): " USER_GROUP
 USER_GROUP=${USER_GROUP%% *}
 USER_GROUP=${USER_GROUP:-${SUDO_USER}}
-echo "[Info] Group: ${USER_GROUP}"
+echo "${WARNH}[Info] Group: ${USER_GROUP}${WARNT}"
 echo
 
 groupadd ${USER_GROUP}
@@ -49,6 +55,7 @@ passwd ${SUDO_USER}
 else # setup after root
 
 GITHUB_PATH=~/All/git/github
+
 mkdir -p ${GITHUB_PATH}/centixkadon
 cd ${GITHUB_PATH}/centixkadon
 git clone https://centixkadon@github.com/centixkadon/settings.git

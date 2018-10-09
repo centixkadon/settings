@@ -1,0 +1,12 @@
+[Unit]
+Description=ssh_reverse_proxy
+After=network.target
+
+[Service]
+User=${USER}
+Group=${GROUP}
+ExecStart=autossh -fCNR ${PORT_REMOTE}:127.0.0.1:${PORT_LOCAL} ${SSH_USER}@${SSH_HOST} -p ${SSH_PORT}
+ExecStop=
+
+[Install]
+WantedBy=multi-user.target
