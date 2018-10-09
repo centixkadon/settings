@@ -5,8 +5,11 @@ After=network.target
 [Service]
 User=${USER}
 Group=${GROUP}
+Type=forking
 ExecStart=autossh -gfCNL ${PORT_LOCAL}:${HOST_REMOTE}:${PORT_REMOTE} ${SSH_USER}@127.0.0.1 -p ${SSH_PORT}
-ExecStop=
+TimeoutSec=0
+RemainAfterExit=yes
+GuessMainPID=no
 
 [Install]
 WantedBy=multi-user.target

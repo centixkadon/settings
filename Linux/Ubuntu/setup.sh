@@ -1,5 +1,7 @@
 #!/bin/bash
 
+stty erase ^H
+
 WARNH=$(echo -e "\033[0;1;31m")
 WARNT=$(echo -e "\033[0m")
 
@@ -27,7 +29,7 @@ echo "${WARNH}[ToDo] change DocumentRoot in /etc/apache2/sites-available/000-def
 
 # shadowsocks
 
-sudo apt install libsodium-dev npm
+sudo apt install libsodium-dev npm sqlite3
 
 mkdir -p ${GITHUB_PATH}/shadowsocks
 cd ${GITHUB_PATH}/shadowsocks
@@ -35,19 +37,22 @@ git clone https://github.com/shadowsocks/shadowsocks.git
 git clone https://github.com/shadowsocks/shadowsocks-manager.git
 
 cd ${GITHUB_PATH}/shadowsocks/shadowsocks
+git checkout master
 chmod +x setup.py
-./setup.py build
-sudo ./setup.py install
+python setup.py build
+sudo python setup.py install
 
 sudo mkdir -p /etc/shadowsocks
 sudo ln -sf ${SETTINGS_PATH}/shadowsocks/config.json /etc/shadowsocks/config.json
 
 cd ${GITHUB_PATH}/shadowsocks/shadowsocks-manager
-npm -i
+npm install
+
+mkdir -p ~/.ssmgr
 ln -sf ${SETTINGS_PATH}/shadowsocks/sscount.yml ~/.ssmgr/sscount.yml
 ln -sf ${SETTINGS_PATH}/shadowsocks/sswebgui.yml ~/.ssmgr/sswebgui.yml
-echo "${WARNH}[ToDo] comment sendMail in sendCode${WARNT}"
-echo "${WARNH}[ToDo] comment throw in sendCode & checkCode${WARNT}"
+echo "${WARNH}[ToDo] comment sendMail in plugins/email/index.js sendCode${WARNT}"
+echo "${WARNH}[ToDo] comment throw in plugins/email/index.js checkCode & checkCodeFromTelegram${WARNT}"
 
 
 # copy script
@@ -76,9 +81,10 @@ echo "${WARNH}[Info] shadowsocks group: ${SHADOWSOCKS_GROUP}${WARNT}"
 echo
 
 sudo ln -sf ~/All/script/startup/shadowsocks.sh /etc/shadowsocks/shadowsocks.sh
-sudo sed '
+sudo cp ~/All/script/startup/shadowsocks.service /lib/systemd/system/shadowsocks.service
+sudo sed -i '
   s/${USER}/'${SHADOWSOCKS_USER}'/
-  s/${GROUP}/'${SHADOWSOCKS_GROUP}'/' ~/All/script/startup/shadowsocks.service > /lib/systemd/system/shadowsocks.service
+  s/${GROUP}/'${SHADOWSOCKS_GROUP}'/' /lib/systemd/system/shadowsocks.service
 sudo systemctl enable shadowsocks.service
 
 touch ~/All/systemctl.log

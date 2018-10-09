@@ -1,5 +1,7 @@
 #!/bin/bash
 
+stty erase ^H
+
 case $1 in
 "install")
   sudo apt install autossh
@@ -14,7 +16,8 @@ case $1 in
   ssh-copy-id ${SSH_USER_LOCAL}@127.0.0.1 -p ${SSH_PORT_LOCAL}
 
   MY_GROUP=$(groups)
-  sudo sed '
+  sudo cp ~/All/script/startup/ssh_forward_proxy.service /lib/systemd/system/ssh_forward_proxy.service
+  sudo sed -i '
     s/${USER}/'$(whoami)'/
     s/${GROUP}/'${MY_GROUP%% *}'/
     s/${PORT_LOCAL}/'${PROXY_PORT_LOCAL}'/
@@ -22,7 +25,7 @@ case $1 in
     s/${PORT_REMOTE}/'${PROXY_PORT_REMOTE}'/
     s/${SSH_USER}/'${SSH_USER_LOCAL}'/
     s/${SSH_PORT}/'${SSH_PORT_LOCAL}'/
-    ' ~/All/script/startup/ssh_forward_proxy.service > /lib/systemd/system/ssh_forward_proxy.service
+    ' /lib/systemd/system/ssh_forward_proxy.service
   sudo systemctl enable ssh_forward_proxy.service
 
   ;;
@@ -35,7 +38,8 @@ case $1 in
   ssh-copy-id ${SSH_USER}@127.0.0.1 -p ${SSH_PORT}
 
   MY_GROUP=$(groups)
-  sudo sed '
+  sudo cp ~/All/script/startup/ssh_forward_proxy.service /lib/systemd/system/ssh_forward_proxy.service
+  sudo sed -i '
     s/${USER}/'$(whoami)'/
     s/${GROUP}/'${MY_GROUP%% *}'/
     s/${PORT_LOCAL}/'${PROXY_PORT_FROM}'/
@@ -43,7 +47,7 @@ case $1 in
     s/${PORT_REMOTE}/'${PROXY_PORT_TO}'/
     s/${SSH_USER}/'${SSH_USER_LOCAL}'/
     s/${SSH_PORT}/'${SSH_PORT_LOCAL}'/
-    ' ~/All/script/startup/ssh_forward_proxy.service > /lib/systemd/system/ssh_forward_proxy.service
+    ' /lib/systemd/system/ssh_forward_proxy.service
   sudo systemctl enable ssh_forward_proxy.service
 
   ;;
@@ -57,6 +61,7 @@ case $1 in
   ssh-copy-id ${SSH_USER_REMOTE}@${SSH_HOST_REMOTE} -p ${SSH_PORT_REMOTE}
 
   MY_GROUP=$(groups)
+  sudo cp ~/All/script/startup/ssh_reverse_proxy.service /lib/systemd/system/ssh_reverse_proxy.service
   sed '
     s/${USER}/'$(whoami)'/
     s/${GROUP}/'${MY_GROUP%% *}'/
@@ -65,7 +70,7 @@ case $1 in
     s/${SSH_USER}/'${SSH_USER_REMOTE}'/
     s/${SSH_HOST}/'${SSH_HOST_REMOTE}'/
     s/${SSH_PORT}/'${SSH_PORT_REMOTE}'/
-    ' ~/All/script/startup/ssh_reverse_proxy.service > /lib/systemd/system/ssh_reverse_proxy.service
+    ' /lib/systemd/system/ssh_reverse_proxy.service
   sudo systemctl enable ssh_reverse_proxy.service
 
   ;;

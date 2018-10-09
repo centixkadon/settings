@@ -4,6 +4,8 @@
 #   chmod +x root.sh
 #   ./root.sh
 
+stty erase ^H
+
 WARNH=$(echo -e "\033[0;1;31m")
 WARNT=$(echo -e "\033[0m")
 
@@ -51,6 +53,9 @@ echo
 groupadd ${USER_GROUP}
 useradd -m -g ${USER_GROUP} -G sudo -s /bin/bash ${SUDO_USER}
 passwd ${SUDO_USER}
+
+cp /root/root.sh /home/${SUDO_USER}/root.sh
+chown ${SUDO_USER}.${USER_GROUP} /home/${SUDO_USER}/root.sh
 
 else # setup after root
 

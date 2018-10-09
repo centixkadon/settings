@@ -5,8 +5,13 @@ After=network.target
 [Service]
 User=${USER}
 Group=${GROUP}
+Type=forking
 ExecStart=/etc/shadowsocks/shadowsocks.sh start
-ExecStop=
+ExecStop=/etc/shadowsocks/shadowsocks.sh stop
+TimeoutSec=0
+RemainAfterExit=yes
+GuessMainPID=no
 
 [Install]
 WantedBy=multi-user.target
+
