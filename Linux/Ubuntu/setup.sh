@@ -9,6 +9,14 @@ GITHUB_PATH=~/All/git/github
 SETTINGS_PATH=${GITHUB_PATH}/centixkadon/settings
 
 
+# config git
+
+read -p "input git email: " GIT_EMAIL
+read -p "input git name: " GIT_NAME
+git config --global user.email "${GIT_EMAIL}"
+git config --global user.name "${GIT_NAME}"
+
+
 # server security
 
 sudo apt install denyhosts
@@ -87,5 +95,13 @@ sudo sed -i '
   s/${GROUP}/'${SHADOWSOCKS_GROUP}'/' /lib/systemd/system/shadowsocks.service
 sudo systemctl enable shadowsocks.service
 
-touch ~/All/systemctl.log
-chmod +rw ~/All/systemctl.log
+
+# log
+
+mkdir -p ~/All/log
+
+touch ~/All/log/systemctl.log
+chmod +rw ~/All/log/systemctl.log
+
+touch ~/All/log/shadowsocks.log
+chmod +rw ~/All/log/shadowsocks.log
