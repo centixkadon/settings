@@ -56,9 +56,12 @@ sudo ln -sf ${SETTINGS_PATH}/shadowsocks/config.json /etc/shadowsocks/config.jso
 cd ${GITHUB_PATH}/shadowsocks/shadowsocks-manager
 npm install
 
+read -sp "config shadowsocks-manager password: " SSMGR_PASSWORD && echo
 mkdir -p ~/.ssmgr
-ln -sf ${SETTINGS_PATH}/shadowsocks/sscount.yml ~/.ssmgr/sscount.yml
-ln -sf ${SETTINGS_PATH}/shadowsocks/sswebgui.yml ~/.ssmgr/sswebgui.yml
+cp ${SETTINGS_PATH}/shadowsocks/sscount.yml ~/.ssmgr/sscount.yml
+sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/' ~/.ssmgr/sscount.yml
+cp ${SETTINGS_PATH}/shadowsocks/sswebgui.yml ~/.ssmgr/sswebgui.yml
+sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/' ~/.ssmgr/sswebgui.yml
 echo "${WARNH}[ToDo] comment sendMail in plugins/email/index.js sendCode${WARNT}"
 echo "${WARNH}[ToDo] comment throw in plugins/email/index.js checkCode & checkCodeFromTelegram${WARNT}"
 

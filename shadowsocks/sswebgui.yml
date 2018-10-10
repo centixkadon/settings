@@ -2,7 +2,7 @@ type: m
 
 manager:
   address: 127.0.0.1:11111
-  password: '1234qwerASDF'
+  password: '${PASSWORD}'
 
 plugins:
   flowSaver:
