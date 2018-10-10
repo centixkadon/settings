@@ -18,13 +18,13 @@ case $1 in
   MY_GROUP=$(groups)
   sudo cp ~/All/script/startup/ssh_forward_proxy.service /lib/systemd/system/ssh_forward_proxy.service
   sudo sed -i '
-    s/${USER}/'$(whoami)'/
-    s/${GROUP}/'${MY_GROUP%% *}'/
-    s/${PORT_LOCAL}/'${PROXY_PORT_LOCAL}'/
-    s/${HOST_REMOTE}/'${PROXY_HOST_REMOTE}'/
-    s/${PORT_REMOTE}/'${PROXY_PORT_REMOTE}'/
-    s/${SSH_USER}/'${SSH_USER_LOCAL}'/
-    s/${SSH_PORT}/'${SSH_PORT_LOCAL}'/
+    s/${USER}/'$(whoami)'/g
+    s/${GROUP}/'${MY_GROUP%% *}'/g
+    s/${PORT_LOCAL}/'${PROXY_PORT_LOCAL}'/g
+    s/${HOST_REMOTE}/'${PROXY_HOST_REMOTE}'/g
+    s/${PORT_REMOTE}/'${PROXY_PORT_REMOTE}'/g
+    s/${SSH_USER}/'${SSH_USER_LOCAL}'/g
+    s/${SSH_PORT}/'${SSH_PORT_LOCAL}'/g
     ' /lib/systemd/system/ssh_forward_proxy.service
   sudo systemctl enable ssh_forward_proxy.service
 
@@ -35,18 +35,18 @@ case $1 in
   read -p "proxy from this local port: " PROXY_PORT_FROM
   read -p "proxy to this local port: " PROXY_PORT_TO
   ssh-keygen
-  ssh-copy-id ${SSH_USER}@127.0.0.1 -p ${SSH_PORT}
+  ssh-copy-id ${SSH_USER_LOCAL}@127.0.0.1 -p ${SSH_PORT_LOCAL}
 
   MY_GROUP=$(groups)
   sudo cp ~/All/script/startup/ssh_forward_proxy.service /lib/systemd/system/ssh_forward_proxy.service
   sudo sed -i '
-    s/${USER}/'$(whoami)'/
-    s/${GROUP}/'${MY_GROUP%% *}'/
-    s/${PORT_LOCAL}/'${PROXY_PORT_FROM}'/
-    s/${HOST_REMOTE}/127.0.0.1/
-    s/${PORT_REMOTE}/'${PROXY_PORT_TO}'/
-    s/${SSH_USER}/'${SSH_USER_LOCAL}'/
-    s/${SSH_PORT}/'${SSH_PORT_LOCAL}'/
+    s/${USER}/'$(whoami)'/g
+    s/${GROUP}/'${MY_GROUP%% *}'/g
+    s/${PORT_LOCAL}/'${PROXY_PORT_FROM}'/g
+    s/${HOST_REMOTE}/127.0.0.1/g
+    s/${PORT_REMOTE}/'${PROXY_PORT_TO}'/g
+    s/${SSH_USER}/'${SSH_USER_LOCAL}'/g
+    s/${SSH_PORT}/'${SSH_PORT_LOCAL}'/g
     ' /lib/systemd/system/ssh_forward_proxy.service
   sudo systemctl enable ssh_forward_proxy.service
 
@@ -63,13 +63,13 @@ case $1 in
   MY_GROUP=$(groups)
   sudo cp ~/All/script/startup/ssh_reverse_proxy.service /lib/systemd/system/ssh_reverse_proxy.service
   sed '
-    s/${USER}/'$(whoami)'/
-    s/${GROUP}/'${MY_GROUP%% *}'/
-    s/${PORT_REMOTE}/'${PROXY_PORT_REMOTE}'/
-    s/${PORT_LOCAL}/'${PROXY_PORT_LOCAL}'/
-    s/${SSH_USER}/'${SSH_USER_REMOTE}'/
-    s/${SSH_HOST}/'${SSH_HOST_REMOTE}'/
-    s/${SSH_PORT}/'${SSH_PORT_REMOTE}'/
+    s/${USER}/'$(whoami)'/g
+    s/${GROUP}/'${MY_GROUP%% *}'/g
+    s/${PORT_REMOTE}/'${PROXY_PORT_REMOTE}'/g
+    s/${PORT_LOCAL}/'${PROXY_PORT_LOCAL}'/g
+    s/${SSH_USER}/'${SSH_USER_REMOTE}'/g
+    s/${SSH_HOST}/'${SSH_HOST_REMOTE}'/g
+    s/${SSH_PORT}/'${SSH_PORT_REMOTE}'/g
     ' /lib/systemd/system/ssh_reverse_proxy.service
   sudo systemctl enable ssh_reverse_proxy.service
 

@@ -31,7 +31,7 @@ SSH_PORT=${SSH_PORT:-${SSH_PORT_DEFAULT}}
 echo "${WARNH}[Info] SSH port: ${SSH_PORT}${WARNT}"
 echo
 
-sed -ri.bak 's/ *#? *Port +[0-9]+/Port '${SSH_PORT}'/' /etc/ssh/sshd_config
+sed -ri.bak 's/ *#? *Port +[0-9]+/Port '${SSH_PORT}'/g' /etc/ssh/sshd_config
 /etc/init.d/ssh restart
 
 

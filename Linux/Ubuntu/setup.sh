@@ -59,11 +59,12 @@ npm install
 read -sp "config shadowsocks-manager password: " SSMGR_PASSWORD && echo
 mkdir -p ~/.ssmgr
 cp ${SETTINGS_PATH}/shadowsocks/sscount.yml ~/.ssmgr/sscount.yml
-sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/' ~/.ssmgr/sscount.yml
+sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/g' ~/.ssmgr/sscount.yml
 cp ${SETTINGS_PATH}/shadowsocks/sswebgui.yml ~/.ssmgr/sswebgui.yml
-sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/' ~/.ssmgr/sswebgui.yml
+sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/g' ~/.ssmgr/sswebgui.yml
 echo "${WARNH}[ToDo] comment sendMail in plugins/email/index.js sendCode${WARNT}"
 echo "${WARNH}[ToDo] comment throw in plugins/email/index.js checkCode & checkCodeFromTelegram${WARNT}"
+echo "${WARNH}[ToDo] run \"~/All/script/sswebgui.sh --debug\" first to register${WARNT}"
 
 
 # copy script
@@ -94,8 +95,8 @@ echo
 sudo ln -sf ~/All/script/startup/shadowsocks.sh /etc/shadowsocks/shadowsocks.sh
 sudo cp ~/All/script/startup/shadowsocks.service /lib/systemd/system/shadowsocks.service
 sudo sed -i '
-  s/${USER}/'${SHADOWSOCKS_USER}'/
-  s/${GROUP}/'${SHADOWSOCKS_GROUP}'/' /lib/systemd/system/shadowsocks.service
+  s/${USER}/'${SHADOWSOCKS_USER}'/g
+  s/${GROUP}/'${SHADOWSOCKS_GROUP}'/g' /lib/systemd/system/shadowsocks.service
 sudo systemctl enable shadowsocks.service
 
 
