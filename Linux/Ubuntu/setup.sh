@@ -33,6 +33,9 @@ git clone https://centixkadon@github.com/centixkadon/centixkadon.github.io.git
 
 sudo apt install apache2
 echo "${WARNH}[ToDo] change DocumentRoot in /etc/apache2/sites-available/000-default.conf${WARNT}"
+echo "${WARNH}[ToDo] change <Directory> in /etc/apache2/apache2.conf${WARNT}"
+echo "${WARNH}[ToDo] change ErrorDocument in /etc/apache2/conf-available/localized-error-pages.conf${WARNT}"
+echo "${WARNH}[ToDo] change Alias & <Directory> in /etc/apache2/conf-available/javascript-common.conf${WARNT}"
 
 
 # shadowsocks
