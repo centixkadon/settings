@@ -65,11 +65,12 @@ cp ${SETTINGS_PATH}/shadowsocks/sscount.yml ~/.ssmgr/sscount.yml
 sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/g' ~/.ssmgr/sscount.yml
 cp ${SETTINGS_PATH}/shadowsocks/sswebgui.yml ~/.ssmgr/sswebgui.yml
 sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/g' ~/.ssmgr/sswebgui.yml
-cp ${SETTINGS_PATH}/shadowsocks/sswebguireal.yml ~/.ssmgr/sswebgui.yml
+cp ${SETTINGS_PATH}/shadowsocks/sswebguireal.yml ~/.ssmgr/sswebguireal.yml
 sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/g' ~/.ssmgr/sswebguireal.yml
 echo "${WARNH}[ToDo] comment sendMail in plugins/email/index.js sendCode${WARNT}"
 echo "${WARNH}[ToDo] comment throw in plugins/email/index.js checkCode & checkCodeFromTelegram${WARNT}"
 echo "${WARNH}[ToDo] run \"~/All/script/sswebgui.sh --debug\" first to register${WARNT}"
+echo "${WARNH}[ToDo] maybe should run \"git checkout a052fdce7a00150e6a89219201b57fc0efb11761\"${WARNT}"
 
 
 # copy script
