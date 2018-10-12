@@ -95,7 +95,7 @@ SHADOWSOCKS_GROUP=${SHADOWSOCKS_GROUP:-${SHADOWSOCKS_GROUP_DEFAULT}}
 echo "${WARNH}[Info] shadowsocks group: ${SHADOWSOCKS_GROUP}${WARNT}"
 echo
 
-sudo ln -sf ~/All/script/startup/shadowsocks.sh /etc/shadowsocks/shadowsocks.sh
+sudo ln -sf ~/All/script/startup/shadowsocks.sh /etc/init.d/shadowsocks.sh
 sudo cp ~/All/script/startup/shadowsocks.service /lib/systemd/system/shadowsocks.service
 sudo sed -i '
   s/${USER}/'${SHADOWSOCKS_USER}'/g
