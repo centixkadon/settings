@@ -8,6 +8,10 @@ shadowsocks_realstart() {
   screen -dmS sswebgui ~/All/script/sswebgui.sh -c sswebguireal.yml
 }
 
+shadowsocks_debugstart() {
+  screen -dmS sswebgui ~/All/script/sswebgui.sh -c sswebguireal.yml --debug
+}
+
 shadowsocks_webguistop() {
   screen -S sswebgui -X quit
 }
@@ -35,6 +39,11 @@ realstart)
   shadowsocks_realstart
   echo "$(date) | shadowsocks realstart" >> ~/All/log/systemctl.log
   ;;
+debugstart)
+  shadowsocks_start
+  shadowsocks_debugstart
+  echo "$(date) | shadowsocks debugstart" >> ~/All/log/systemctl.log
+  ;;
 stop)
   shadowsocks_webguistop
   shadowsocks_stop
@@ -47,17 +56,22 @@ restart)
   shadowsocks_normalstart
   echo "$(date) | shadowsocks restart" >> ~/All/log/systemctl.log
   ;;
-realrestart)
-  shadowsocks_webguistop
-  shadowsocks_realstart
-  echo "$(date) | shadowsocks realrestart" >> ~/All/log/systemctl.log
-  ;;
 normalrestart)
   shadowsocks_webguistop
   shadowsocks_normalstart
   echo "$(date) | shadowsocks normalrestart" >> ~/All/log/systemctl.log
   ;;
+realrestart)
+  shadowsocks_webguistop
+  shadowsocks_realstart
+  echo "$(date) | shadowsocks realrestart" >> ~/All/log/systemctl.log
+  ;;
+realrestart)
+  shadowsocks_webguistop
+  shadowsocks_debugstart
+  echo "$(date) | shadowsocks debugrestart" >> ~/All/log/systemctl.log
+  ;;
 *)
-  echo "Usage: /etc/init.d/shadowsocks.sh {start|stop|restart|realstart|realrestart|normalrestart}"
+  echo "Usage: /etc/init.d/shadowsocks.sh {start|realstart|debugstart|stop|restart|normalrestart|realrestart|debugrestart}"
   ;;
 esac
