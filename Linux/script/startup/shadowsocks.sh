@@ -66,7 +66,7 @@ realrestart)
   shadowsocks_realstart
   echo "$(date) | shadowsocks realrestart" >> ~/All/log/systemctl.log
   ;;
-realrestart)
+debugrestart)
   shadowsocks_webguistop
   shadowsocks_debugstart
   echo "$(date) | shadowsocks debugrestart" >> ~/All/log/systemctl.log
