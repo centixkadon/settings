@@ -6,7 +6,7 @@ case $1 in
 
   sleep 1
   screen -dmS sscount ~/All/script/sscount.sh
-  screen -dmS sswebgui ~/All/script/sswebgui.sh
+  screen -dmS sswebgui ~/All/script/sswebgui.sh -c sswebgui.yml
 
   echo "$(date) | shadowsocks start" >> ~/All/log/systemctl.log
 
