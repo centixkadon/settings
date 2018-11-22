@@ -16,8 +16,18 @@ def printHelp():
   print("  {} JSON PATH".format(sys.argv[0]), file=sys.stderr)
 
 def printCommandHelp():
-  print("usage:", file=sys.stderr)
-  print("  h        print help", file=sys.stderr)
+  print("command usage:", file=sys.stderr)
+  print("  h                                  print this help", file=sys.stderr)
+  print("  q                                  quit", file=sys.stderr)
+  print("  p                                  previous page", file=sys.stderr)
+  print("  n                                  next page", file=sys.stderr)
+  print("  j PAGE                             jump to page PAGE", file=sys.stderr)
+  print("  f                                  force refresh", file=sys.stderr)
+  print("  l                                  list gallerys of current page", file=sys.stderr)
+  print("  d NUM1 [NUM2 [...]]                download gallery in interval {NUM1} ∪ {NUM2} ∪ ...", file=sys.stderr)
+  print("  d NUM1_START:NUM1_STOP [...]       download gallery in interval [NUM1_START .. NUM1_STOP) ∪ ...", file=sys.stderr)
+  print("  s                                  search all (jump to the home page)", file=sys.stderr)
+  print("  s SEARCH                           search SEARCH", file=sys.stderr)
 
 
 def list_find(l1, l2):
@@ -32,16 +42,24 @@ class HTMLParser(html.parser.HTMLParser):
   time_next = time.time()
 
   @staticmethod
-  def sleep():
+  def sleep(debug=None):
+    if debug == None:
+      debug = True
+
     time_step = HTMLParser.time_step
     time_next = HTMLParser.time_next
     while time.time() < time_next :
-      logging.info("sleep")
-      t = max(0, time_next - time.time() + 0.01) * 0.1
-      for i in range(10):
-        print(".", end="", flush=True)
+      logging.debug("sleep")
+      t = max(0, time_next - time.time() + 0.01)
+      if debug:
+        time_count = 10
+        print("sleep   : ", end="", flush=True)
+        for i in range(time_count):
+          print(".", end="", flush=True)
+          time.sleep(t / time_count)
+        print("")
+      else:
         time.sleep(t)
-      print("")
     time_next += min(max(time_step * 0.5, random.gauss(time_step, time_step * 0.2)), time_step * 2.0) + random.uniform(-time_step * 0.1, time_step * 0.1)
     HTMLParser.time_next = time_next
 
@@ -76,9 +94,10 @@ class HTMLParser(html.parser.HTMLParser):
 
 
 class RootParser(HTMLParser):
-  def __init__(self, url):
+  def __init__(self, url, headersReferer):
     super().__init__()
     self.url = url
+    self.headersReferer = headersReferer
     self.thumbnails = []
     self.links = []
     self.titles = []
@@ -101,7 +120,7 @@ class RootParser(HTMLParser):
       self.pageMax = max(self.pageMax, page)
 
   def list(self):
-    return [dict(zip(("thumbnail", "link", "title"), items)) for items in zip(self.thumbnails, self.links, self.titles)]
+    return [dict(zip(("thumbnail", "link", "title", "referer"), items + (self.headersReferer,))) for items in zip(self.thumbnails, self.links, self.titles)]
 
 
 class GalleryParser(HTMLParser):
@@ -175,19 +194,18 @@ def main(jsonFilename, gallerysPath):
         gallerysFresh = False
 
         HTMLParser.sleep()
-        logging.info("get")
+        logging.debug("get root page")
         r = s.get(info["url"], params=info["params"])
+        logging.debug("root headers - {}".format(r.request.headers))
+        logging.debug("root cookies - {}".format(s.cookies))
         s.headers.update({"Referer": r.request.url})
-
-        print(s.headers)
-        print(s.cookies)
 
         rootHTMLPrefix = "<!DOCTYPE html PUBLIC "
         if r.text[:len(rootHTMLPrefix)] != rootHTMLPrefix:
           logging.error(r.text)
           raise Exception
 
-        rootParser = RootParser(info["url"])
+        rootParser = RootParser(info["url"], r.request.url)
         rootParser.feed(r.text)
         gallerysList = rootParser.list()
         for i in range(len(gallerysList)):
@@ -201,6 +219,7 @@ def main(jsonFilename, gallerysPath):
         break
       elif cmd == "h":
         printCommandHelp()
+
       elif cmd == "p":
         if gallerysPage - 1 < 0:
           continue
@@ -214,10 +233,13 @@ def main(jsonFilename, gallerysPath):
         if (tmp < 0) or (rootParser.pageMax <= tmp) or (tmp == gallerysPage):
           continue
         gallerysPage = tmp
+      elif cmd == "f":
+        gallerysFresh = True
+
       elif cmd == "l":
         for galleryIndex in range(gallerysPage * 25, (gallerysPage + 1) * 25):
           if galleryIndex in gallerys:
-            print("{:5} {}".format(galleryIndex, gallerys[galleryIndex]["title"][:150]))
+            print("{:5} {:7} {}".format(galleryIndex, gallerys[galleryIndex]["link"].split("/")[4], gallerys[galleryIndex]["title"][:150]))
       elif cmd == "d":
         if len(line) == 2:
           gallerysIndexs = set()
@@ -227,17 +249,17 @@ def main(jsonFilename, gallerysPath):
               gallerysIndexs.add(int(numbers[0]))
             elif len(numbers) == 2:
               gallerysIndexs = gallerysIndexs.union(range(int(numbers[0]), int(numbers[1])))
-          print(gallerysIndexs)
+          print("gallerysIndexs: {}".format(gallerysIndexs))
 
           for gallerysIndex in gallerysIndexs:
             galleryLink = gallerys[gallerysIndex]["link"]
             galleryFolder = galleryLink.split("/")[4]
-            headersReferer = r.request.url
-            print(galleryFolder)
+            headersReferer = gallerys[gallerysIndex]["referer"]
 
             HTMLParser.sleep()
-            logging.info("get")
+            logging.debug("get gallery pages")
             r = s.get(galleryLink, headers={"Referer": headersReferer})
+            logging.debug("gallery headers - {}".format(r.request.headers))
             headersReferer = r.request.url
 
             galleryHTMLPrefix = "<!DOCTYPE html PUBLIC "
@@ -248,13 +270,16 @@ def main(jsonFilename, gallerysPath):
 
             galleryParser = GalleryParser(headersReferer)
             galleryParser.feed(r.text[galleryHTMLIndex:])
-            print("galleryParser.pageMax: {}".format(galleryParser.pageMax))
+            print("galleryFolder: {}, pageMax: {}".format(galleryFolder, galleryParser.pageMax))
+
             images = galleryParser.list()
+            print("gallery : +", end="", flush=True)
             for i in range(1, galleryParser.pageMax):
-              HTMLParser.sleep()
-              logging.info("get")
+              HTMLParser.sleep(False)
               r = s.get(galleryLink, params={"p": i}, headers={"Referer": headersReferer})
+              logging.debug("gallery headers - {}".format(r.request.headers))
               headersReferer = r.request.url
+              print("+", end="", flush=True)
 
               galleryHTMLPrefix = "<!DOCTYPE html PUBLIC "
               galleryHTMLIndex = r.text.find(galleryHTMLPrefix)
@@ -262,14 +287,23 @@ def main(jsonFilename, gallerysPath):
                 logging.error(r.text)
                 raise Exception
 
-              galleryParser = GalleryParser()
+              galleryParser = GalleryParser(headersReferer)
               galleryParser.feed(r.text[galleryHTMLIndex:])
               images += galleryParser.list()
+            print("")
 
-            for image in [images[0]]:
-              HTMLParser.sleep()
-              logging.info("get")
+            galleryPath = gallerysPath + "/" + galleryFolder
+
+            print("prepare : ", end="", flush=True)
+            for image in images:
+              if os.path.exists(galleryPath + "/" + image["title"]):
+                print("+", end="", flush=True)
+                continue
+
+              HTMLParser.sleep(False)
               r = s.get(image["link"], headers={"Referer": image["referer"]})
+              logging.debug("image headers - {}".format(r.request.headers))
+              print("+", end="", flush=True)
 
               imageHTMLPrefix = "<!DOCTYPE html PUBLIC "
               imageHTMLIndex = r.text.find(imageHTMLPrefix)
@@ -282,17 +316,26 @@ def main(jsonFilename, gallerysPath):
               if imageParser.link == None:
                 raise Exception
               image["src"] = imageParser.link
+            print("")
 
-            galleryPath = gallerysPath + "/" + galleryFolder
             if not os.path.exists(galleryPath):
               os.makedirs(galleryPath)
-            for image in [images[0]]:
-              r = requests.get(image["src"])
-              with open(galleryPath + "/" + image["title"], "wb") as f:
-                f.write(r.content)
 
-      elif cmd == "f":
-        gallerysFresh = True
+            print("download: ", end="", flush=True)
+            for image in images:
+              if "src" not in image:
+                print("+", end="", flush=True)
+                continue
+
+              try:
+                r = requests.get(image["src"])
+                print("+", end="", flush=True)
+                with open(galleryPath + "/" + image["title"], "wb") as f:
+                  f.write(r.content)
+              except requests.exceptions.ConnectionError:
+                print("-", end="", flush=True)
+            print("")
+
       elif cmd == "s":
         gallerys = {}
         gallerysPage = 0
