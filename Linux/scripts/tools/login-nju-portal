@@ -1,0 +1,69 @@
+#!/usr/bin/python3
+
+import getopt
+import sys
+import time
+import logging
+
+import requests
+import json
+
+def printHelp():
+  print("usage:", file=sys.stderr)
+  print("  {} USERNAME PASSWORD DELAY_SECONDS".format(sys.argv[0]), file=sys.stderr)
+
+host = "http://p.nju.edu.cn"
+io_url = host + "/portal_io"
+timeout = (3.1, 15.1)
+
+def logout(username):
+  try:
+    userinfoRequest = requests.post(io_url + "/getinfo", timeout=timeout)
+  except requests.exceptions.Timeout:
+    logging.warning("Timeout")
+    return False
+  if userinfoRequest.status_code == 200:
+    userinfo = userinfoRequest.json()
+    if "userinfo" in userinfo and "username" in userinfo["userinfo"]:
+      if userinfo["userinfo"]["username"] == username:
+        return False
+      else:
+        try:
+          requests.post(io_url + "/logout", timeout=timeout)
+        except requests.exceptions.Timeout:
+          logging.warning("Timeout")
+          return False
+  return True
+
+def login(username, password):
+  if logout(username):
+    try:
+      requests.post(io_url + "/login", data={"username": username, "password": password}, timeout=timeout)
+      logging.info("Login")
+    except requests.exceptions.Timeout:
+      logging.warning("Timeout")
+
+def main(username, password, delay):
+  try:
+    delay = float(delay)
+    if delay < 0:
+      raise ValueError
+  except ValueError:
+    logging.error("DELAY_SECONDS is not a number")
+    printHelp()
+    return
+
+  logging.info("Parameters: {{ username: {}, password: {}, delay: {} }}".format(username, password, delay))
+
+  while True:
+    login(username, password)
+    time.sleep(delay)
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s - %(message)s")
+
+if __name__ == "__main__":
+  if len(sys.argv) == 4:
+    main(sys.argv[1], sys.argv[2], sys.argv[3])
+  else:
+    printHelp()
