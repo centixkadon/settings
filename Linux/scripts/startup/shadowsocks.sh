@@ -1,15 +1,15 @@
 #!/bin/bash
 
 shadowsocks_normalstart() {
-  screen -dmS sswebgui ~/All/script/sswebgui.sh -c sswebgui.yml
+  screen -dmS sswebgui ~/All/scripts/sswebgui.sh -c sswebgui.yml
 }
 
 shadowsocks_realstart() {
-  screen -dmS sswebgui ~/All/script/sswebgui.sh -c sswebguireal.yml
+  screen -dmS sswebgui ~/All/scripts/sswebgui.sh -c sswebguireal.yml
 }
 
 shadowsocks_debugstart() {
-  screen -dmS sswebgui ~/All/script/sswebgui.sh -c sswebguireal.yml --debug
+  screen -dmS sswebgui ~/All/scripts/sswebgui.sh -c sswebguireal.yml --debug
 }
 
 shadowsocks_webguistop() {
@@ -17,10 +17,10 @@ shadowsocks_webguistop() {
 }
 
 shadowsocks_start() {
-  screen -dmS ssserver ~/All/script/ssserver.sh
+  screen -dmS ssserver ~/All/scripts/ssserver.sh
 
   sleep 1
-  screen -dmS sscount ~/All/script/sscount.sh
+  screen -dmS sscount ~/All/scripts/sscount.sh
 }
 
 shadowsocks_stop() {

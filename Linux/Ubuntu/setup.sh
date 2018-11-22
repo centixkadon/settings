@@ -58,6 +58,7 @@ sudo ln -sf ${SETTINGS_PATH}/shadowsocks/config.json /etc/shadowsocks/config.jso
 
 cd ${GITHUB_PATH}/shadowsocks/shadowsocks-manager
 npm install
+npm run build
 
 read -sp "config shadowsocks-manager password: " SSMGR_PASSWORD && echo
 mkdir -p ~/.ssmgr
@@ -69,16 +70,16 @@ cp ${SETTINGS_PATH}/shadowsocks/sswebguireal.yml ~/.ssmgr/sswebguireal.yml
 sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/g' ~/.ssmgr/sswebguireal.yml
 echo "${WARNH}[ToDo] comment sendMail in plugins/email/index.js sendCode${WARNT}"
 echo "${WARNH}[ToDo] comment throw in plugins/email/index.js checkCode & checkCodeFromTelegram${WARNT}"
-echo "${WARNH}[ToDo] run \"~/All/script/sswebgui.sh --debug\" first to register${WARNT}"
+echo "${WARNH}[ToDo] run \"~/All/scripts/sswebgui.sh --debug\" first to register${WARNT}"
 echo "${WARNH}[ToDo] maybe should run \"git checkout a052fdce7a00150e6a89219201b57fc0efb11761\"${WARNT}"
 
 
-# copy script
+# copy scripts
 
-ln -sf ${SETTINGS_PATH}/Linux/script ~/All/script
-cd ~/All/script
-sudo ln -sf ~/All/script/who-the-hell-is-using-the-server /usr/bin/who-the-hell-is-using-the-server
-sudo ln -sf ~/All/script/who-the-hell-is-using-the-nvidia /usr/bin/who-the-hell-is-using-the-nvidia
+ln -sf ${SETTINGS_PATH}/Linux/scripts ~/All/scripts
+cd ~/All/scripts
+sudo ln -sf ~/All/scripts/who-the-hell-is-using-the-server /usr/bin/who-the-hell-is-using-the-server
+sudo ln -sf ~/All/scripts/who-the-hell-is-using-the-nvidia /usr/bin/who-the-hell-is-using-the-nvidia
 
 
 # enable service
@@ -98,8 +99,8 @@ SHADOWSOCKS_GROUP=${SHADOWSOCKS_GROUP:-${SHADOWSOCKS_GROUP_DEFAULT}}
 echo "${WARNH}[Info] shadowsocks group: ${SHADOWSOCKS_GROUP}${WARNT}"
 echo
 
-sudo ln -sf ~/All/script/startup/shadowsocks.sh /etc/init.d/shadowsocks.sh
-sudo cp ~/All/script/startup/shadowsocks.service /lib/systemd/system/shadowsocks.service
+sudo ln -sf ~/All/scripts/startup/shadowsocks.sh /etc/init.d/shadowsocks.sh
+sudo cp ~/All/scripts/startup/shadowsocks.service /lib/systemd/system/shadowsocks.service
 sudo sed -i '
   s/${USER}/'${SHADOWSOCKS_USER}'/g
   s/${GROUP}/'${SHADOWSOCKS_GROUP}'/g' /lib/systemd/system/shadowsocks.service

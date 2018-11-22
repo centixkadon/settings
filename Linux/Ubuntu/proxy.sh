@@ -16,7 +16,7 @@ case $1 in
   ssh-copy-id ${SSH_USER_LOCAL}@127.0.0.1 -p ${SSH_PORT_LOCAL}
 
   MY_GROUP=$(groups)
-  sudo cp ~/All/script/startup/ssh_forward_proxy.service /lib/systemd/system/ssh_forward_proxy.service
+  sudo cp ~/All/scripts/startup/ssh_forward_proxy.service /lib/systemd/system/ssh_forward_proxy.service
   sudo sed -i '
     s/${USER}/'$(whoami)'/g
     s/${GROUP}/'${MY_GROUP%% *}'/g
@@ -38,7 +38,7 @@ case $1 in
   ssh-copy-id ${SSH_USER_LOCAL}@127.0.0.1 -p ${SSH_PORT_LOCAL}
 
   MY_GROUP=$(groups)
-  sudo cp ~/All/script/startup/ssh_forward_proxy.service /lib/systemd/system/ssh_forward_proxy.service
+  sudo cp ~/All/scripts/startup/ssh_forward_proxy.service /lib/systemd/system/ssh_forward_proxy.service
   sudo sed -i '
     s/${USER}/'$(whoami)'/g
     s/${GROUP}/'${MY_GROUP%% *}'/g
@@ -61,7 +61,7 @@ case $1 in
   ssh-copy-id ${SSH_USER_REMOTE}@${SSH_HOST_REMOTE} -p ${SSH_PORT_REMOTE}
 
   MY_GROUP=$(groups)
-  sudo cp ~/All/script/startup/ssh_reverse_proxy.service /lib/systemd/system/ssh_reverse_proxy.service
+  sudo cp ~/All/scripts/startup/ssh_reverse_proxy.service /lib/systemd/system/ssh_reverse_proxy.service
   sed '
     s/${USER}/'$(whoami)'/g
     s/${GROUP}/'${MY_GROUP%% *}'/g
