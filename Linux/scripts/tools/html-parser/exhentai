@@ -1,0 +1,356 @@
+#!/usr/bin/python3
+
+import os
+import sys
+
+import logging
+import random
+import time
+
+import html.parser
+import json
+import requests
+
+def printHelp():
+  print("usage:", file=sys.stderr)
+  print("  {} JSON PATH".format(sys.argv[0]), file=sys.stderr)
+
+def printCommandHelp():
+  print("usage:", file=sys.stderr)
+  print("  h        print help", file=sys.stderr)
+
+
+def list_find(l1, l2):
+  for i in range(len(l1) - len(l2)):
+    if l1[i:i + len(l2)] == l2:
+      return i
+  return -1
+
+
+class HTMLParser(html.parser.HTMLParser):
+  time_step = 2
+  time_next = time.time()
+
+  @staticmethod
+  def sleep():
+    time_step = HTMLParser.time_step
+    time_next = HTMLParser.time_next
+    while time.time() < time_next :
+      logging.info("sleep")
+      t = max(0, time_next - time.time() + 0.01) * 0.1
+      for i in range(10):
+        print(".", end="", flush=True)
+        time.sleep(t)
+      print("")
+    time_next += min(max(time_step * 0.5, random.gauss(time_step, time_step * 0.2)), time_step * 2.0) + random.uniform(-time_step * 0.1, time_step * 0.1)
+    HTMLParser.time_next = time_next
+
+  def __init__(self):
+    super().__init__()
+    self.tags = []
+    self.attrss = []
+    self.datas = []
+
+  def handle_starttag(self, tag, attrs):
+    self.tags.append(tag)
+    self.attrss.append(dict(attrs))
+    self.datas.append("")
+
+  def handle_endtag(self, tag):
+    self.datas.pop()
+    self.attrss.pop()
+    self.tags.pop()
+
+  def handle_startendtag(self, tag, attrs):
+    self.handle_starttag(tag, attrs)
+    self.handle_data("")
+    self.handle_endtag(tag)
+
+  def handle_data(self, data):
+    if len(self.datas) > 0:
+      self.datas[-1] += data
+    self.handle_parser()
+
+  def handle_parser(self):
+    raise NotImplementedError
+
+
+class RootParser(HTMLParser):
+  def __init__(self, url):
+    super().__init__()
+    self.url = url
+    self.thumbnails = []
+    self.links = []
+    self.titles = []
+    self.pageMax = 0
+
+  def handle_parser(self):
+    if self.tags[-6:] == ["table", "tr", "td", "div", "div", "img"]:
+      self.thumbnails.append(self.attrss[-1]["src"])
+    elif self.tags[-5:] == ["table", "tr", "td", "div", "div"]:
+      info = self.datas[-1].split("~")[2:]
+      self.thumbnails.append(self.url + info[0])
+    elif self.tags[-6:] == ["table", "tr", "td", "div", "div", "a"]:
+      self.links.append(self.attrss[-1]["href"])
+      self.titles.append(self.datas[-1])
+    elif self.tags[-4:] == ["table", "tr", "td", "a"]:
+      try:
+        page = int(self.datas[-1])
+      except ValueError:
+        page = 1
+      self.pageMax = max(self.pageMax, page)
+
+  def list(self):
+    return [dict(zip(("thumbnail", "link", "title"), items)) for items in zip(self.thumbnails, self.links, self.titles)]
+
+
+class GalleryParser(HTMLParser):
+  def __init__(self, headersReferer):
+    super().__init__()
+    self.headersReferer = headersReferer
+    self.thumbnails = []
+    self.links = []
+    self.titles = []
+    self.pageMax = 0
+
+  def handle_parser(self):
+    if (self.tags[-4:] == ["div", "div", "a", "img"]) and ("class" in self.attrss[-4]) and (self.attrss[-4]["class"] == "gdtm"):
+      self.thumbnails.append(self.attrss[-3]["style"].split(" url(", 1)[1].split(") ")[0])
+      self.links.append(self.attrss[-2]["href"])
+      self.titles.append(self.attrss[-1]["title"].split(": ", 1)[1])
+    elif self.tags[-4:] == ["table", "tr", "td", "a"]:
+      try:
+        page = int(self.datas[-1])
+      except ValueError:
+        page = 1
+      self.pageMax = max(self.pageMax, page)
+
+  def list(self):
+    return [dict(zip(("thumbnail", "link", "title", "referer"), items + (self.headersReferer,))) for items in zip(self.thumbnails, self.links, self.titles)]
+
+
+class ImageParser(HTMLParser):
+  def __init__(self):
+    super().__init__()
+    self.link = None
+
+  def handle_parser(self):
+    if (len(self.attrss) > 0) and ("id" in self.attrss[-1]) and (self.attrss[-1]["id"] == "img"):
+      self.link = self.attrss[-1]["src"]
+
+
+class RequestTest():
+  def __init__(self, s):
+    self.text = s
+
+
+def main(jsonFilename, gallerysPath):
+  with open(jsonFilename, "rb") as f:
+    info = json.load(f)
+    info["params"] = {
+      "page": None,
+      "f_doujinshi": None,
+      "f_manga": None,
+      "f_artistcg": None,
+      "f_gamecg": None,
+      "f_western": None,
+      "f_non-h": None,
+      "f_imageset": None,
+      "f_cosplay": None,
+      "f_asianporn": None,
+      "f_misc": None,
+      "f_search": None,
+      "f_apply": None
+    }
+
+  gallerys = {}
+  gallerysPage = 0
+  gallerysFresh = False
+  with requests.Session() as s:
+    s.headers.update(info["headers"])
+    for key, value in info["cookies"].items():
+      s.cookies.set(key, value, domain=".exhentai.org")
+    while True:
+      if (gallerysFresh) or (not (gallerysPage * 25) in gallerys):
+        gallerysFresh = False
+
+        HTMLParser.sleep()
+        logging.info("get")
+        r = s.get(info["url"], params=info["params"])
+        s.headers.update({"Referer": r.request.url})
+
+        print(s.headers)
+        print(s.cookies)
+
+        rootHTMLPrefix = "<!DOCTYPE html PUBLIC "
+        if r.text[:len(rootHTMLPrefix)] != rootHTMLPrefix:
+          logging.error(r.text)
+          raise Exception
+
+        rootParser = RootParser(info["url"])
+        rootParser.feed(r.text)
+        gallerysList = rootParser.list()
+        for i in range(len(gallerysList)):
+          gallerys[gallerysPage * 25 + i] = gallerysList[i]
+
+        print("page: {}, pageMax: {}, length: {}".format(gallerysPage, rootParser.pageMax, len(gallerys)))
+
+      line = input(">>> ").split(" ", 1)
+      cmd = line[0]
+      if cmd == "q":
+        break
+      elif cmd == "h":
+        printCommandHelp()
+      elif cmd == "p":
+        if gallerysPage - 1 < 0:
+          continue
+        gallerysPage = gallerysPage - 1
+      elif cmd == "n":
+        if rootParser.pageMax <= gallerysPage + 1:
+          continue
+        gallerysPage = gallerysPage + 1
+      elif cmd == "j":
+        tmp = int(line[1])
+        if (tmp < 0) or (rootParser.pageMax <= tmp) or (tmp == gallerysPage):
+          continue
+        gallerysPage = tmp
+      elif cmd == "l":
+        for galleryIndex in range(gallerysPage * 25, (gallerysPage + 1) * 25):
+          if galleryIndex in gallerys:
+            print("{:5} {}".format(galleryIndex, gallerys[galleryIndex]["title"][:150]))
+      elif cmd == "d":
+        if len(line) == 2:
+          gallerysIndexs = set()
+          for item in line[1].split(" "):
+            numbers = item.split(":")
+            if (len(numbers) == 1) and (numbers[0] != ""):
+              gallerysIndexs.add(int(numbers[0]))
+            elif len(numbers) == 2:
+              gallerysIndexs = gallerysIndexs.union(range(int(numbers[0]), int(numbers[1])))
+          print(gallerysIndexs)
+
+          for gallerysIndex in gallerysIndexs:
+            galleryLink = gallerys[gallerysIndex]["link"]
+            galleryFolder = galleryLink.split("/")[4]
+            headersReferer = r.request.url
+            print(galleryFolder)
+
+            HTMLParser.sleep()
+            logging.info("get")
+            r = s.get(galleryLink, headers={"Referer": headersReferer})
+            headersReferer = r.request.url
+
+            galleryHTMLPrefix = "<!DOCTYPE html PUBLIC "
+            galleryHTMLIndex = r.text.find(galleryHTMLPrefix)
+            if galleryHTMLIndex == -1:
+              logging.error(r.text)
+              raise Exception
+
+            galleryParser = GalleryParser(headersReferer)
+            galleryParser.feed(r.text[galleryHTMLIndex:])
+            print("galleryParser.pageMax: {}".format(galleryParser.pageMax))
+            images = galleryParser.list()
+            for i in range(1, galleryParser.pageMax):
+              HTMLParser.sleep()
+              logging.info("get")
+              r = s.get(galleryLink, params={"p": i}, headers={"Referer": headersReferer})
+              headersReferer = r.request.url
+
+              galleryHTMLPrefix = "<!DOCTYPE html PUBLIC "
+              galleryHTMLIndex = r.text.find(galleryHTMLPrefix)
+              if galleryHTMLIndex == -1:
+                logging.error(r.text)
+                raise Exception
+
+              galleryParser = GalleryParser()
+              galleryParser.feed(r.text[galleryHTMLIndex:])
+              images += galleryParser.list()
+
+            for image in [images[0]]:
+              HTMLParser.sleep()
+              logging.info("get")
+              r = s.get(image["link"], headers={"Referer": image["referer"]})
+
+              imageHTMLPrefix = "<!DOCTYPE html PUBLIC "
+              imageHTMLIndex = r.text.find(imageHTMLPrefix)
+              if imageHTMLIndex == -1:
+                logging.error(r.text)
+                raise Exception
+
+              imageParser = ImageParser()
+              imageParser.feed(r.text[imageHTMLIndex:])
+              if imageParser.link == None:
+                raise Exception
+              image["src"] = imageParser.link
+
+            galleryPath = gallerysPath + "/" + galleryFolder
+            if not os.path.exists(galleryPath):
+              os.makedirs(galleryPath)
+            for image in [images[0]]:
+              r = requests.get(image["src"])
+              with open(galleryPath + "/" + image["title"], "wb") as f:
+                f.write(r.content)
+
+      elif cmd == "f":
+        gallerysFresh = True
+      elif cmd == "s":
+        gallerys = {}
+        gallerysPage = 0
+        if len(line) == 2:
+          info["params"] = {
+            "page": None,
+            "f_doujinshi": "1",
+            "f_manga": "1",
+            "f_artistcg": "1",
+            "f_gamecg": "1",
+            "f_western": "1",
+            "f_non-h": "1",
+            "f_imageset": "1",
+            "f_cosplay": "1",
+            "f_asianporn": "1",
+            "f_misc": "1",
+            "f_search": line[1],
+            "f_apply": "Apply Filter"
+          }
+        else:
+          info["params"] = {
+            "page": None,
+            "f_doujinshi": None,
+            "f_manga": None,
+            "f_artistcg": None,
+            "f_gamecg": None,
+            "f_western": None,
+            "f_non-h": None,
+            "f_imageset": None,
+            "f_cosplay": None,
+            "f_asianporn": None,
+            "f_misc": None,
+            "f_search": None,
+            "f_apply": None
+          }
+
+      if gallerysPage == 0:
+        info["params"]["page"] = None
+      else:
+        info["params"]["page"] = gallerysPage
+      if cmd in {"p", "n", "j"}:
+        info["params"].update({
+          "f_doujinshi": info["params"]["f_doujinshi"] and "on",
+          "f_manga": info["params"]["f_manga"] and "on",
+          "f_artistcg": info["params"]["f_artistcg"] and "on",
+          "f_gamecg": info["params"]["f_gamecg"] and "on",
+          "f_western": info["params"]["f_western"] and "on",
+          "f_non-h": info["params"]["f_non-h"] and "on",
+          "f_imageset": info["params"]["f_imageset"] and "on",
+          "f_cosplay": info["params"]["f_cosplay"] and "on",
+          "f_asianporn": info["params"]["f_asianporn"] and "on",
+          "f_misc": info["params"]["f_misc"] and "on"
+        })
+
+
+if __name__ == "__main__":
+  logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s - %(message)s")
+  if len(sys.argv) == 3:
+    main(sys.argv[1], sys.argv[2])
+  else:
+    printHelp()
