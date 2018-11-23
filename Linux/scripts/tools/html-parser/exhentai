@@ -137,7 +137,7 @@ class GalleryParser(HTMLParser):
       self.thumbnails.append(self.attrss[-3]["style"].split(" url(", 1)[1].split(") ")[0])
       self.links.append(self.attrss[-2]["href"])
       self.titles.append(self.attrss[-1]["title"].split(": ", 1)[1])
-    elif self.tags[-4:] == ["table", "tr", "td", "a"]:
+    elif (self.tags[-4:] == ["table", "tr", "td", "a"]) and ("class" in self.attrss[-4]) and (self.attrss[-4]["class"] == "ptt"):
       try:
         page = int(self.datas[-1])
       except ValueError:
@@ -252,8 +252,14 @@ def main(jsonFilename, gallerysPath):
           print("gallerysIndexs: {}".format(gallerysIndexs))
 
           for gallerysIndex in gallerysIndexs:
+            if gallerysIndex not in gallerys:
+              continue
+
             galleryLink = gallerys[gallerysIndex]["link"]
-            galleryFolder = galleryLink.split("/")[4]
+            galleryFolder = gallerys[gallerysIndex]["title"][:150]
+            for c in '\/:*?"<>|':
+              galleryFolder.replace(c, "-")
+            galleryFolder = galleryLink.split("/")[4] + " - " + galleryFolder
             headersReferer = gallerys[gallerysIndex]["referer"]
 
             HTMLParser.sleep()
@@ -290,51 +296,43 @@ def main(jsonFilename, gallerysPath):
               galleryParser = GalleryParser(headersReferer)
               galleryParser.feed(r.text[galleryHTMLIndex:])
               images += galleryParser.list()
-            print("")
+            print(" length: {}".format(len(images)))
 
             galleryPath = gallerysPath + "/" + galleryFolder
-
-            print("prepare : ", end="", flush=True)
-            for image in images:
-              if os.path.exists(galleryPath + "/" + image["title"]):
-                print("+", end="", flush=True)
-                continue
-
-              HTMLParser.sleep(False)
-              r = s.get(image["link"], headers={"Referer": image["referer"]})
-              logging.debug("image headers - {}".format(r.request.headers))
-              print("+", end="", flush=True)
-
-              imageHTMLPrefix = "<!DOCTYPE html PUBLIC "
-              imageHTMLIndex = r.text.find(imageHTMLPrefix)
-              if imageHTMLIndex == -1:
-                logging.error(r.text)
-                raise Exception
-
-              imageParser = ImageParser()
-              imageParser.feed(r.text[imageHTMLIndex:])
-              if imageParser.link == None:
-                raise Exception
-              image["src"] = imageParser.link
-            print("")
-
             if not os.path.exists(galleryPath):
               os.makedirs(galleryPath)
 
-            print("download: ", end="", flush=True)
-            for image in images:
-              if "src" not in image:
-                print("+", end="", flush=True)
-                continue
+            for i in range(3):
+              print("download: ", end="", flush=True)
+              for image in images:
+                if os.path.exists(galleryPath + "/" + image["title"]):
+                  print("+", end="", flush=True)
+                  continue
 
-              try:
-                r = requests.get(image["src"])
-                print("+", end="", flush=True)
-                with open(galleryPath + "/" + image["title"], "wb") as f:
-                  f.write(r.content)
-              except requests.exceptions.ConnectionError:
-                print("-", end="", flush=True)
-            print("")
+                HTMLParser.sleep(False)
+                r = s.get(image["link"], headers={"Referer": image["referer"]})
+                logging.debug("image headers - {}".format(r.request.headers))
+
+                imageHTMLPrefix = "<!DOCTYPE html PUBLIC "
+                imageHTMLIndex = r.text.find(imageHTMLPrefix)
+                if imageHTMLIndex == -1:
+                  logging.error(r.text)
+                  raise Exception
+
+                imageParser = ImageParser()
+                imageParser.feed(r.text[imageHTMLIndex:])
+                if imageParser.link == None:
+                  raise Exception
+                image["src"] = imageParser.link
+
+                try:
+                  r = requests.get(image["src"], timeout=(3.1, 27.1))
+                  print("+", end="", flush=True)
+                  with open(galleryPath + "/" + image["title"], "wb") as f:
+                    f.write(r.content)
+                except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, ConnectionResetError):
+                  print("-", end="", flush=True)
+              print("")
 
       elif cmd == "s":
         gallerys = {}
