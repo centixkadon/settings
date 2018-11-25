@@ -1,0 +1,21 @@
+{
+  "__comment__": {
+    "__comment__": "You should delete comments and edit keys below.",
+    "url": "",
+    "headers": {
+      "__comment__": "User-Agent is the most important key. However, it would be better if you add ALL Keys you could find in your browser.",
+      "User-Agent": ""
+    },
+    "cookies": {
+      "__comment__": "Find in your browser.",
+      "igneous": "",
+      "ipb_member_id": "",
+      "ipb_pass_hash": ""
+    },
+    "proxies": {
+      "__comment__": "Proxies support.",
+      "http": "socks5://127.0.0.1:1080",
+      "https": "socks5://127.0.0.1:1080"
+    }
+  }
+}

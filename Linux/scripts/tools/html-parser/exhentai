@@ -11,46 +11,79 @@ import html.parser
 import json
 import requests
 
-def printHelp():
-  print("usage:", file=sys.stderr)
-  print("  {} JSON PATH".format(sys.argv[0]), file=sys.stderr)
+def printHelp(program, file=sys.stderr):
+  print('usage:', file=file)
+  print('  {} JSON PATH [CMD_LINES [GALLERYS_JSON [SEARCHS_JSON]]]'.format(program), file=file)
+  print('params:', file=file)
+  print('  JSON             json filename of url, headers and cookies', file=file)
+  print('    .=== xxx.json ============================== e.g. ===.', file=file)
+  print('    | {                                                  |', file=file)
+  print('    |   "url": "https://exhentai.org/",                  |', file=file)
+  print('    |   "headers": {                                     |', file=file)
+  print('    |     "Every-Key": "you can find in your browser" |', file=file)
+  print('    |   },                                               |', file=file)
+  print('    |   "cookies": {                                     |', file=file)
+  print('    |     "igneous": "xxx",                              |', file=file)
+  print('    |     "ipb_member_id": "xxx",                        |', file=file)
+  print('    |     "ipb_pass_hash": "xxx"                         |', file=file)
+  print('    |   }                                             .--|', file=file)
+  print('    | }                                               | / ', file=file)
+  print("    '--------------------------------------------------'  ", file=file)
+  print('  PATH             download root path', file=file)
+  print('  CMD_LINES        commands separated by line', file=file)
+  print('  GALLERYS_JSON    json filename to store gallerys infomation', file=file)
+  print('  SEARCHS_JSON     json filename to store search results', file=file)
 
 def printCommandHelp():
-  print("command usage:", file=sys.stderr)
-  print("  h                                  print this help", file=sys.stderr)
-  print("  q                                  quit", file=sys.stderr)
-  print("  p                                  previous page", file=sys.stderr)
-  print("  n                                  next page", file=sys.stderr)
-  print("  j PAGE                             jump to page PAGE", file=sys.stderr)
-  print("  f                                  force refresh", file=sys.stderr)
-  print("  l                                  list gallerys of current page", file=sys.stderr)
-  print("  d NUM1 [NUM2 [...]]                download gallery in interval {NUM1} ∪ {NUM2} ∪ ...", file=sys.stderr)
-  print("  d NUM1_START:NUM1_STOP [...]       download gallery in interval [NUM1_START .. NUM1_STOP) ∪ ...", file=sys.stderr)
-  print("  s                                  search all (jump to the home page)", file=sys.stderr)
-  print("  s SEARCH                           search SEARCH", file=sys.stderr)
+  print("command usage:")
+  print("  h                                  print this help")
+  print("  q                                  quit")
+  print("  p                                  previous page")
+  print("  n                                  next page")
+  print("  j PAGE                             jump to page PAGE")
+  print("  f                                  force refresh")
+  print("  l                                  list gallerys of current page")
+  print("  t CONNECT READ                     set CONNECT and READ timeout seconds")
+  print("  d NUM1 [NUM2 [...]]                download gallery in interval {NUM1} ∪ {NUM2} ∪ ...")
+  print("  d NUM1_START:NUM1_STOP [...]       download gallery in interval [NUM1_START .. NUM1_STOP) ∪ ...")
+  print("    image downloading marks:")
+  print("      + download completed")
+  print("      - download timeout")
+  print("      x connection failed")
+  print("  s                                  search all (jump to the home page)")
+  print("  s SEARCH                           search SEARCH")
 
 
-def list_find(l1, l2):
-  for i in range(len(l1) - len(l2)):
-    if l1[i:i + len(l2)] == l2:
-      return i
-  return -1
+class CrawlerError(Exception):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
 
+class JsonError(CrawlerError):
+  pass
+
+class BanError(CrawlerError):
+  pass
+
+class ParserError(CrawlerError):
+  pass
+
+class LimitError(CrawlerError):
+  pass
 
 class HTMLParser(html.parser.HTMLParser):
-  time_step = 2
-  time_next = time.time()
+  _time_step = 2.0
+  _time_next = time.time()
 
   @staticmethod
   def sleep(debug=None):
     if debug == None:
       debug = True
 
-    time_step = HTMLParser.time_step
-    time_next = HTMLParser.time_next
+    time_step = HTMLParser._time_step
+    time_next = HTMLParser._time_next
     while time.time() < time_next :
       logging.debug("sleep")
-      t = max(0, time_next - time.time() + 0.01)
+      t = max(0.0, time_next - time.time()) + 0.01
       if debug:
         time_count = 10
         print("sleep   : ", end="", flush=True)
@@ -61,23 +94,31 @@ class HTMLParser(html.parser.HTMLParser):
       else:
         time.sleep(t)
     time_next += min(max(time_step * 0.5, random.gauss(time_step, time_step * 0.2)), time_step * 2.0) + random.uniform(-time_step * 0.1, time_step * 0.1)
-    HTMLParser.time_next = time_next
+    HTMLParser._time_next = time_next
 
   def __init__(self):
     super().__init__()
-    self.tags = []
-    self.attrss = []
-    self.datas = []
+    self._tags = []
+    self._attrss = []
+    self._datas = []
+
+  def feed(self, data):
+    HTMLIndex = data.find("<!DOCTYPE html PUBLIC ")
+    if HTMLIndex == -1:
+      msg = data[:200]
+      logging.error(msg)
+      raise BanError(msg)
+    super().feed(data[HTMLIndex:])
 
   def handle_starttag(self, tag, attrs):
-    self.tags.append(tag)
-    self.attrss.append(dict(attrs))
-    self.datas.append("")
+    self._tags.append(tag)
+    self._attrss.append(dict(attrs))
+    self._datas.append("")
 
   def handle_endtag(self, tag):
-    self.datas.pop()
-    self.attrss.pop()
-    self.tags.pop()
+    self._datas.pop()
+    self._attrss.pop()
+    self._tags.pop()
 
   def handle_startendtag(self, tag, attrs):
     self.handle_starttag(tag, attrs)
@@ -85,87 +126,146 @@ class HTMLParser(html.parser.HTMLParser):
     self.handle_endtag(tag)
 
   def handle_data(self, data):
-    if len(self.datas) > 0:
-      self.datas[-1] += data
+    if len(self._datas) > 0:
+      self._datas[-1] += data
     self.handle_parser()
 
   def handle_parser(self):
     raise NotImplementedError
 
 
-class RootParser(HTMLParser):
-  def __init__(self, url, headersReferer):
+class SearchParser(HTMLParser):
+  def __init__(self, url, referer):
     super().__init__()
-    self.url = url
-    self.headersReferer = headersReferer
-    self.thumbnails = []
-    self.links = []
-    self.titles = []
-    self.pageMax = 0
+    self._url = url
+    self._referer = referer
+    self._thumbnails = []
+    self._links = []
+    self._titles = []
+    self._pageMax = 0
 
   def handle_parser(self):
-    if self.tags[-6:] == ["table", "tr", "td", "div", "div", "img"]:
-      self.thumbnails.append(self.attrss[-1]["src"])
-    elif self.tags[-5:] == ["table", "tr", "td", "div", "div"]:
-      info = self.datas[-1].split("~")[2:]
-      self.thumbnails.append(self.url + info[0])
-    elif self.tags[-6:] == ["table", "tr", "td", "div", "div", "a"]:
-      self.links.append(self.attrss[-1]["href"])
-      self.titles.append(self.datas[-1])
-    elif self.tags[-4:] == ["table", "tr", "td", "a"]:
-      try:
-        page = int(self.datas[-1])
-      except ValueError:
-        page = 1
-      self.pageMax = max(self.pageMax, page)
+    if self._tags[-6:] == ["table", "tr", "td", "div", "div", "img"]:
+      self._thumbnails.append(self._attrss[-1]["src"])
+    elif self._tags[-5:] == ["table", "tr", "td", "div", "div"]:
+      info = self._datas[-1].split("~")[2:]
+      self._thumbnails.append(self._url + info[0])
+    elif self._tags[-6:] == ["table", "tr", "td", "div", "div", "a"]:
+      self._links.append(self._attrss[-1]["href"])
+      self._titles.append(self._datas[-1])
+    elif self._tags[-4:] == ["table", "tr", "td", "a"]:
+      pageData = self._datas[-1]
+      if pageData not in ["<", ">"]:
+        try:
+          page = int(pageData)
+        except ValueError:
+          msg = "Search HTML parser error: Invalid page number"
+          logging.error(msg)
+          raise ParserError(msg)
+        self._pageMax = max(self._pageMax, page)
 
   def list(self):
-    return [dict(zip(("thumbnail", "link", "title", "referer"), items + (self.headersReferer,))) for items in zip(self.thumbnails, self.links, self.titles)]
+    if not len(self._thumbnails) == len(self._links) == len(self._titles):
+      msg = "Search HTML parser error: Items length not equal"
+      logging.error(msg)
+      raise ParserError("Search HTML parser error: Items length not equal")
+    return [dict(zip(("thumbnail", "link", "title", "referer"), items + (self._referer,))) for items in zip(self._thumbnails, self._links, self._titles)]
+
+  def pageMax(self):
+    return self._pageMax
 
 
 class GalleryParser(HTMLParser):
-  def __init__(self, headersReferer):
+  def __init__(self, referer):
     super().__init__()
-    self.headersReferer = headersReferer
-    self.thumbnails = []
-    self.links = []
-    self.titles = []
-    self.pageMax = 0
+    self._referer = referer
+    self._thumbnails = []
+    self._links = []
+    self._titles = []
+    self._pageMax = 0
 
   def handle_parser(self):
-    if (self.tags[-4:] == ["div", "div", "a", "img"]) and ("class" in self.attrss[-4]) and (self.attrss[-4]["class"] == "gdtm"):
-      self.thumbnails.append(self.attrss[-3]["style"].split(" url(", 1)[1].split(") ")[0])
-      self.links.append(self.attrss[-2]["href"])
-      self.titles.append(self.attrss[-1]["title"].split(": ", 1)[1])
-    elif (self.tags[-4:] == ["table", "tr", "td", "a"]) and ("class" in self.attrss[-4]) and (self.attrss[-4]["class"] == "ptt"):
-      try:
-        page = int(self.datas[-1])
-      except ValueError:
-        page = 1
-      self.pageMax = max(self.pageMax, page)
+    if self._tags[-4:] == ["div", "div", "a", "img"] and "class" in self._attrss[-4] and self._attrss[-4]["class"] == "gdtm":
+      self._thumbnails.append(self._attrss[-3]["style"].split(" url(", 1)[1].split(") ")[0])
+      self._links.append(self._attrss[-2]["href"])
+      self._titles.append(self._attrss[-1]["title"].split(": ", 1)[1])
+    elif self._tags[-4:] == ["table", "tr", "td", "a"] and "class" in self._attrss[-4] and self._attrss[-4]["class"] == "ptt":
+      pageData = self._datas[-1]
+      if pageData not in ["<", ">"]:
+        try:
+          page = int(pageData)
+        except ValueError:
+          msg = "Gallery HTML parser error: Invalid page number"
+          logging.error(msg)
+          raise ParserError("Gallery HTML parser error: Invalid page number")
+        self._pageMax = max(self._pageMax, page)
 
   def list(self):
-    return [dict(zip(("thumbnail", "link", "title", "referer"), items + (self.headersReferer,))) for items in zip(self.thumbnails, self.links, self.titles)]
+    print("gallery list")
+    if not len(self._thumbnails) == len(self._links) == len(self._titles):
+      msg = "Gallery HTML parser error: Items length not equal"
+      logging.error(msg)
+      raise ParserError("Gallery HTML parser error: Items length not equal")
+    return [dict(zip(("thumbnail", "link", "title", "referer"), items + (self._referer,))) for items in zip(self._thumbnails, self._links, self._titles)]
+
+  def pageMax(self):
+    return self._pageMax
 
 
 class ImageParser(HTMLParser):
   def __init__(self):
     super().__init__()
-    self.link = None
+    self._link = None
 
   def handle_parser(self):
-    if (len(self.attrss) > 0) and ("id" in self.attrss[-1]) and (self.attrss[-1]["id"] == "img"):
-      self.link = self.attrss[-1]["src"]
+    if len(self._attrss) > 0 and "id" in self._attrss[-1] and self._attrss[-1]["id"] == "img":
+      if self._link != None:
+        msg = "Image HTML parser error: Image link too much"
+        logging.error(msg)
+        raise ParserError("Image HTML parser error: Image link too much")
+      self._link = self._attrss[-1]["src"]
+
+  def link(self):
+    if self._link == None:
+      msg = "Image HTML parser error: Image link not found"
+      logging.error(msg)
+      raise ParserError("Image HTML parser error: Image link not found")
+    return self._link
 
 
-class RequestTest():
-  def __init__(self, s):
-    self.text = s
+class Object:
+  pass
 
 
-def main(jsonFilename, gallerysPath):
-  with open(jsonFilename, "rb") as f:
-    info = json.load(f)
+def readJson(filename=None):
+  if filename != None and os.path.exists(filename):
+    with open(filename, "r", encoding="utf-8") as f:
+      try:
+        return json.load(f)
+      except json.decoder.JSONDecodeError as e:
+        logging.error("json.decoder.JSONDecodeError")
+        raise JsonError(e)
+  return {}
+
+def writeJson(obj, filename=None):
+  if filename != None:
+    with open(filename, "w", encoding="utf-8") as f:
+      json.dump(obj, f)
+
+def main(jsonFilename, gallerysPath, commandLines, gallerysJsonFilename=None, searchsJsonFilename=None):
+  info = readJson(jsonFilename)
+  for k, t, v in [("url", str, "string"), ("headers", dict, "object"), ("cookies", dict, "object")]:
+    if k not in info:
+      msg = 'Expecting key "{}" in json'.format(k)
+      logging.error(msg)
+      raise JsonError(msg)
+    if not isinstance(info[k], t):
+      msg = 'Expecting key "{}" is {}'.format(k, v)
+      logging.error(msg)
+      raise JsonError(msg)
+  if "proxies" not in info:
+    info["proxies"] = {}
+  if "params" not in info:
     info["params"] = {
       "page": None,
       "f_doujinshi": None,
@@ -182,38 +282,56 @@ def main(jsonFilename, gallerysPath):
       "f_apply": None
     }
 
+  commandLinesIndex = 0
+
+  gallerysJson = readJson(gallerysJsonFilename)
+  searchsJson = readJson(searchsJsonFilename)
+
+  gallerysSearch = ""
   gallerys = {}
   gallerysPage = 0
   gallerysFresh = False
+  cmd = ""
+  downloadTimeout = (3.1, 9.1)
   with requests.Session() as s:
     s.headers.update(info["headers"])
     for key, value in info["cookies"].items():
       s.cookies.set(key, value, domain=".exhentai.org")
     while True:
-      if (gallerysFresh) or (not (gallerysPage * 25) in gallerys):
+      if gallerysFresh or str(gallerysPage * 25) not in gallerys:
         gallerysFresh = False
 
         HTMLParser.sleep()
-        logging.debug("get root page")
+        logging.debug("get search page")
         r = s.get(info["url"], params=info["params"])
-        logging.debug("root headers - {}".format(r.request.headers))
-        logging.debug("root cookies - {}".format(s.cookies))
+        logging.debug("search headers - {}".format(r.request.headers))
+        logging.debug("search cookies - {}".format(s.cookies))
         s.headers.update({"Referer": r.request.url})
 
-        rootHTMLPrefix = "<!DOCTYPE html PUBLIC "
-        if r.text[:len(rootHTMLPrefix)] != rootHTMLPrefix:
-          logging.error(r.text)
-          raise Exception
-
-        rootParser = RootParser(info["url"], r.request.url)
-        rootParser.feed(r.text)
-        gallerysList = rootParser.list()
+        logging.debug("parser search page")
+        searchParser = SearchParser(info["url"], r.request.url)
+        searchParser.feed(r.text)
+        logging.debug("get search result")
+        gallerysList = searchParser.list()
+        gallerysPageMax = searchParser.pageMax()
         for i in range(len(gallerysList)):
-          gallerys[gallerysPage * 25 + i] = gallerysList[i]
+          gallerys[str(gallerysPage * 25 + i)] = gallerysList[i]
 
-        print("page: {}, pageMax: {}, length: {}".format(gallerysPage, rootParser.pageMax, len(gallerys)))
+        if gallerysSearch != "":
+          searchsJson[gallerysSearch] = {"p": gallerysPageMax, "g": gallerys}
+        writeJson(searchsJson, searchsJsonFilename)
 
-      line = input(">>> ").split(" ", 1)
+      if cmd in {"s", "p", "n", "j", "l"}:
+        print("page: {}, pageMax: {}, length: {}".format(gallerysPage, gallerysPageMax, len(gallerys)))
+
+      if commandLinesIndex < len(commandLines):
+        line = commandLines[commandLinesIndex]
+        print(">>> {}".format(line))
+        commandLinesIndex += 1
+      else:
+        line = input(">>> ")
+        commandLinesIndex = len(commandLines) + 1
+      line = line.split(" ", 1)
       cmd = line[0]
       if cmd == "q":
         break
@@ -225,12 +343,12 @@ def main(jsonFilename, gallerysPath):
           continue
         gallerysPage = gallerysPage - 1
       elif cmd == "n":
-        if rootParser.pageMax <= gallerysPage + 1:
+        if gallerysPageMax <= gallerysPage + 1:
           continue
         gallerysPage = gallerysPage + 1
       elif cmd == "j":
         tmp = int(line[1])
-        if (tmp < 0) or (rootParser.pageMax <= tmp) or (tmp == gallerysPage):
+        if tmp < 0 or gallerysPageMax <= tmp or tmp == gallerysPage:
           continue
         gallerysPage = tmp
       elif cmd == "f":
@@ -238,106 +356,147 @@ def main(jsonFilename, gallerysPath):
 
       elif cmd == "l":
         for galleryIndex in range(gallerysPage * 25, (gallerysPage + 1) * 25):
+          galleryIndex = str(galleryIndex)
           if galleryIndex in gallerys:
             print("{:5} {:7} {}".format(galleryIndex, gallerys[galleryIndex]["link"].split("/")[4], gallerys[galleryIndex]["title"][:150]))
+      elif cmd == "t":
+        if len(line) == 2:
+          timeouts = line[1].split(" ")
+          if len(timeouts) >= 2:
+            downloadTimeout = tuple(float(x) for x in timeouts[:2])
+          print("timeout: {}".format(downloadTimeout))
+      elif cmd == "r":
+        if len(line) == 2 and line[1] != "":
+          url = line[1]
+          if url == "-":
+            s.proxies = info["proxies"]
+          else:
+            s.proxies = {
+              "http": url,
+              "https": url
+            }
+        else:
+          s.proxies = {}
+        print("proxies: {}".format(s.proxies))
       elif cmd == "d":
         if len(line) == 2:
-          gallerysIndexs = set()
+          gallerysIndexs = []
           for item in line[1].split(" "):
             numbers = item.split(":")
-            if (len(numbers) == 1) and (numbers[0] != ""):
-              gallerysIndexs.add(int(numbers[0]))
+            if len(numbers) == 1 and numbers[0] != "":
+              gallerysIndexs += [int(numbers[0])]
             elif len(numbers) == 2:
-              gallerysIndexs = gallerysIndexs.union(range(int(numbers[0]), int(numbers[1])))
+              n0 = int(numbers[0])
+              n1 = int(numbers[1])
+              gallerysIndexs += list(range(n0, n1, 1 if n0 <= n1 else -1))
           print("gallerysIndexs: {}".format(gallerysIndexs))
 
+          imagesAllCompletedCount = imagesAllCount = 0
           for gallerysIndex in gallerysIndexs:
+            gallerysIndex = str(gallerysIndex)
             if gallerysIndex not in gallerys:
               continue
 
             galleryLink = gallerys[gallerysIndex]["link"]
-            galleryFolder = gallerys[gallerysIndex]["title"][:150]
+            galleryIndex = galleryLink.split("/")[4]
+            galleryTitle = gallerys[gallerysIndex]["title"]
             for c in '\/:*?"<>|':
-              galleryFolder.replace(c, "-")
-            galleryFolder = galleryLink.split("/")[4] + " - " + galleryFolder
-            headersReferer = gallerys[gallerysIndex]["referer"]
+              galleryTitle = galleryTitle.replace(c, "-")
+            if len(galleryTitle) > 150:
+              logging.warning("Gallery title length too long (> 150)")
+            galleryFolder = "{} - {}".format(galleryIndex, galleryTitle)
+            referer = gallerys[gallerysIndex]["referer"]
 
-            HTMLParser.sleep()
-            logging.debug("get gallery pages")
-            r = s.get(galleryLink, headers={"Referer": headersReferer})
-            logging.debug("gallery headers - {}".format(r.request.headers))
-            headersReferer = r.request.url
-
-            galleryHTMLPrefix = "<!DOCTYPE html PUBLIC "
-            galleryHTMLIndex = r.text.find(galleryHTMLPrefix)
-            if galleryHTMLIndex == -1:
-              logging.error(r.text)
-              raise Exception
-
-            galleryParser = GalleryParser(headersReferer)
-            galleryParser.feed(r.text[galleryHTMLIndex:])
-            print("galleryFolder: {}, pageMax: {}".format(galleryFolder, galleryParser.pageMax))
-
-            images = galleryParser.list()
-            print("gallery : +", end="", flush=True)
-            for i in range(1, galleryParser.pageMax):
-              HTMLParser.sleep(False)
-              r = s.get(galleryLink, params={"p": i}, headers={"Referer": headersReferer})
+            print(galleryIndex)
+            if galleryIndex in gallerysJson:
+              images = gallerysJson[galleryIndex]
+              print("gallery: {} - {}".format(gallerysIndex, galleryFolder))
+            else:
+              HTMLParser.sleep()
+              logging.debug("get gallery pages")
+              r = s.get(galleryLink, headers={"Referer": referer})
               logging.debug("gallery headers - {}".format(r.request.headers))
-              headersReferer = r.request.url
-              print("+", end="", flush=True)
+              referer = r.request.url
 
-              galleryHTMLPrefix = "<!DOCTYPE html PUBLIC "
-              galleryHTMLIndex = r.text.find(galleryHTMLPrefix)
-              if galleryHTMLIndex == -1:
-                logging.error(r.text)
-                raise Exception
+              logging.debug("parser gallery page")
+              galleryParser = GalleryParser(referer)
+              galleryParser.feed(r.text)
+              logging.debug("get gallery result")
+              imagesPageMax = galleryParser.pageMax()
+              images = galleryParser.list()
+              print("gallery: {} - {}, pageMax: {}".format(gallerysIndex, galleryFolder, imagesPageMax))
 
-              galleryParser = GalleryParser(headersReferer)
-              galleryParser.feed(r.text[galleryHTMLIndex:])
-              images += galleryParser.list()
-            print(" length: {}".format(len(images)))
+              print("gallery : +", end="", flush=True)
+              for i in range(1, imagesPageMax):
+                HTMLParser.sleep(False)
+                r = s.get(galleryLink, params={"p": i}, headers={"Referer": referer})
+                logging.debug("gallery headers - {}".format(r.request.headers))
+                referer = r.request.url
+                print("+", end="", flush=True)
+
+                galleryParser = GalleryParser(referer)
+                galleryParser.feed(r.text)
+                images += galleryParser.list()
+              print(" length: {}".format(len(images)))
+
+              gallerysJson[galleryIndex] = images
+              writeJson(gallerysJson, gallerysJsonFilename)
 
             galleryPath = gallerysPath + "/" + galleryFolder
             if not os.path.exists(galleryPath):
               os.makedirs(galleryPath)
 
+            imagePrefix = b"<!DOCTYPE html>"
             for i in range(3):
+              imagesCompletedCount = imagesCount = len(images)
               print("download: ", end="", flush=True)
               for image in images:
-                if os.path.exists(galleryPath + "/" + image["title"]):
-                  print("+", end="", flush=True)
-                  continue
+                imageFilename = galleryPath + "/" + image["title"]
+                if os.path.exists(imageFilename):
+                  with open(imageFilename, "rb") as f:
+                    if f.read(len(imagePrefix)) != imagePrefix:
+                      print("+", end="", flush=True)
+                      continue
+                  os.remove(imageFilename)
 
                 HTMLParser.sleep(False)
                 r = s.get(image["link"], headers={"Referer": image["referer"]})
                 logging.debug("image headers - {}".format(r.request.headers))
 
-                imageHTMLPrefix = "<!DOCTYPE html PUBLIC "
-                imageHTMLIndex = r.text.find(imageHTMLPrefix)
-                if imageHTMLIndex == -1:
-                  logging.error(r.text)
-                  raise Exception
-
                 imageParser = ImageParser()
-                imageParser.feed(r.text[imageHTMLIndex:])
-                if imageParser.link == None:
-                  raise Exception
-                image["src"] = imageParser.link
+                imageParser.feed(r.text)
+                image["src"] = imageParser.link()
 
                 try:
-                  r = requests.get(image["src"], timeout=(3.1, 27.1))
+                  r = requests.get(image["src"], timeout=downloadTimeout)
+                  if r.content[:len(imagePrefix)] == imagePrefix:
+                    msg = "You have temporarily reached your page view limit"
+                    logging.error(msg)
+                    raise LimitError(msg)
                   print("+", end="", flush=True)
-                  with open(galleryPath + "/" + image["title"], "wb") as f:
+                  with open(imageFilename, "wb") as f:
                     f.write(r.content)
-                except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, ConnectionResetError):
+                except requests.exceptions.Timeout:
+                  imagesCompletedCount -= 1
                   print("-", end="", flush=True)
+                except requests.exceptions.ConnectionError:
+                  imagesCompletedCount -= 1
+                  print("x", end="", flush=True)
               print("")
+            imagesAllCompletedCount += imagesCompletedCount
+            imagesAllCount += imagesCount
+          print("completed: {} / {}".format(imagesAllCompletedCount, imagesAllCount))
+
+          if commandLinesIndex <= len(commandLines) and imagesAllCompletedCount == imagesAllCount:
+            break
 
       elif cmd == "s":
-        gallerys = {}
-        gallerysPage = 0
-        if len(line) == 2:
+        if len(line) == 2 and line[1] != "":
+          gallerysSearch = line[1]
+          gallerys = {}
+          if gallerysSearch in searchsJson:
+            gallerys = searchsJson[gallerysSearch]["g"]
+            gallerysPageMax = searchsJson[gallerysSearch]["p"]
           info["params"] = {
             "page": None,
             "f_doujinshi": "1",
@@ -350,10 +509,12 @@ def main(jsonFilename, gallerysPath):
             "f_cosplay": "1",
             "f_asianporn": "1",
             "f_misc": "1",
-            "f_search": line[1],
+            "f_search": gallerysSearch,
             "f_apply": "Apply Filter"
           }
         else:
+          gallerysSearch = ""
+          gallerys = {}
           info["params"] = {
             "page": None,
             "f_doujinshi": None,
@@ -369,6 +530,7 @@ def main(jsonFilename, gallerysPath):
             "f_search": None,
             "f_apply": None
           }
+        gallerysPage = 0
 
       if gallerysPage == 0:
         info["params"]["page"] = None
@@ -390,8 +552,31 @@ def main(jsonFilename, gallerysPath):
 
 
 if __name__ == "__main__":
-  logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s - %(message)s")
-  if len(sys.argv) == 3:
-    main(sys.argv[1], sys.argv[2])
+  logging.basicConfig(level=logging.ERROR, format="%(asctime)s %(levelname)s - %(message)s")
+
+  if 3 <= len(sys.argv) <= 6:
+    jsonFilename = sys.argv[1]
+    gallerysPath = sys.argv[2]
+    commandLines = []
+    gallerysJsonFilename = None
+    searchsJsonFilename = None
+    if len(sys.argv) > 3:
+      commandLines = sys.argv[3]
+      if commandLines == "-":
+        commandLines = []
+      else:
+        commandLines = commandLines.splitlines()
+    if len(sys.argv) > 4:
+      gallerysJsonFilename = sys.argv[4]
+    if len(sys.argv) > 5:
+      searchsJsonFilename = sys.argv[5]
+
+    try:
+      logging.debug("args: {} {} {} {} {}".format(jsonFilename, gallerysPath, commandLines, gallerysJsonFilename, searchsJsonFilename))
+      main(jsonFilename, gallerysPath, commandLines, gallerysJsonFilename, searchsJsonFilename)
+    except CrawlerError as e:
+      import traceback
+      traceback.print_exc()
+      exit(2)
   else:
-    printHelp()
+    printHelp(sys.argv[0])
