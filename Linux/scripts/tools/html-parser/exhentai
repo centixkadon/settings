@@ -55,8 +55,8 @@ def printCommandHelp():
 
 
 class CrawlerError(Exception):
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
+  def name(self):
+    return type(self).__name__
 
 class JsonError(CrawlerError):
   pass
@@ -159,9 +159,7 @@ class SearchParser(HTMLParser):
         try:
           page = int(pageData)
         except ValueError:
-          msg = "Search HTML parser error: Invalid page number"
-          logging.error(msg)
-          raise ParserError(msg)
+          raise ParserError("Search HTML parser error: Invalid page number")
         self._pageMax = max(self._pageMax, page)
 
   def list(self):
@@ -195,8 +193,6 @@ class GalleryParser(HTMLParser):
         try:
           page = int(pageData)
         except ValueError:
-          msg = "Gallery HTML parser error: Invalid page number"
-          logging.error(msg)
           raise ParserError("Gallery HTML parser error: Invalid page number")
         self._pageMax = max(self._pageMax, page)
 
@@ -243,7 +239,6 @@ def readJson(filename=None):
       try:
         return json.load(f)
       except json.decoder.JSONDecodeError as e:
-        logging.error("json.decoder.JSONDecodeError")
         raise JsonError(e)
   return {}
 
@@ -575,6 +570,7 @@ if __name__ == "__main__":
       logging.debug("args: {} {} {} {} {}".format(jsonFilename, gallerysPath, commandLines, gallerysJsonFilename, searchsJsonFilename))
       main(jsonFilename, gallerysPath, commandLines, gallerysJsonFilename, searchsJsonFilename)
     except CrawlerError as e:
+      logging.error("{}: {}".format(e.name(), e)
       import traceback
       traceback.print_exc()
       exit(2)
