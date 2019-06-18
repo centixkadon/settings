@@ -36,6 +36,16 @@ echo "${WARNH}[ToDo] change DocumentRoot in /etc/apache2/sites-available/000-def
 echo "${WARNH}[ToDo] change <Directory> in /etc/apache2/apache2.conf${WARNT}"
 echo "${WARNH}[ToDo] change ErrorDocument in /etc/apache2/conf-available/localized-error-pages.conf${WARNT}"
 echo "${WARNH}[ToDo] change Alias & <Directory> in /etc/apache2/conf-available/javascript-common.conf${WARNT}"
+read -sp "press Enter to continue..." && echo
+
+
+# redis
+
+sudo apt install redis-server
+read -sp "config redis password: " REDIS_PASSWORD && echo
+echo "${WARNH}[ToDo] uncomment requirepass in /etc/redis/redis.conf and change foobared to ${REDIS_PASSWORD}${WARNT}"
+read -sp "press Enter to continue..." && echo
+sudo systemctl restart redis.service
 
 
 # shadowsocks
@@ -49,9 +59,12 @@ git clone https://github.com/shadowsocks/shadowsocks-manager.git
 
 cd ${GITHUB_PATH}/shadowsocks/shadowsocks
 git checkout master
-chmod +x setup.py
-python setup.py build
-sudo python setup.py install
+echo "${WARNH}[ToDo] show self._config['server_port'] in logging ${WARNT}"
+echo "${WARNH}[ToDo] add server_port in shadowsocks/shell.py exception_handle.process_exception.print_exception (vary from self_)${WARNT}"
+echo "${WARNH}[ToDo] add server_port in shadowsocks/tcprelay.py TCPRelayHandler._handle_stage_addr.logging.info${WARNT}"
+read -sp "press Enter to continue..." && echo
+python3 setup.py build
+sudo python3 setup.py install
 
 sudo mkdir -p /etc/shadowsocks
 sudo ln -sf ${SETTINGS_PATH}/shadowsocks/config.json /etc/shadowsocks/config.json
@@ -67,11 +80,14 @@ sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/g' ~/.ssmgr/sscount.yml
 cp ${SETTINGS_PATH}/shadowsocks/sswebgui.yml ~/.ssmgr/sswebgui.yml
 sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/g' ~/.ssmgr/sswebgui.yml
 cp ${SETTINGS_PATH}/shadowsocks/sswebguireal.yml ~/.ssmgr/sswebguireal.yml
-sed -i 's/${PASSWORD}/'${SSMGR_PASSWORD}'/g' ~/.ssmgr/sswebguireal.yml
+sed -i '
+  s/${PASSWORD}/'${SSMGR_PASSWORD}'/g
+  s/${REDIS_PASSWORD}/'${REDIS_PASSWORD}'/g' ~/.ssmgr/sswebguireal.yml
 echo "${WARNH}[ToDo] comment sendMail in plugins/email/index.js sendCode${WARNT}"
 echo "${WARNH}[ToDo] comment throw in plugins/email/index.js checkCode & checkCodeFromTelegram${WARNT}"
-echo "${WARNH}[ToDo] run \"~/All/scripts/sswebgui.sh --debug\" first to register${WARNT}"
-echo "${WARNH}[ToDo] maybe should run \"git checkout a052fdce7a00150e6a89219201b57fc0efb11761\"${WARNT}"
+echo "${WARNH}[ToDo] run \"~/All/scripts/sscount.sh\" in one terminal, and in another terminal${WARNT}"
+echo "${WARNH}[ToDo] run \"~/All/scripts/sswebgui.sh -c sswebguireal.yml --debug\" first to register${WARNT}"
+read -sp "press Enter to continue..." && echo
 
 
 # copy scripts

@@ -1,8 +1,6 @@
 #!/bin/bash
 # Download this script using bash:
-#   wget -c https://raw.githubusercontent.com/centixkadon/settings/master/Linux/Ubuntu/root.sh
-#   chmod +x root.sh
-#   ./root.sh
+#   curl -O https://raw.githubusercontent.com/centixkadon/settings/master/Linux/Ubuntu/root.sh && chmod +x root.sh && ./root.sh
 
 stty erase ^H
 
@@ -18,7 +16,7 @@ apt update
 apt upgrade --fix-missing
 apt upgrade --fix-missing
 
-apt install build-essential python-pip python3-pip bash-completion vim git screen
+apt install build-essential python3-pip bash-completion vim git screen
 
 
 # sshd port
@@ -37,7 +35,7 @@ sed -ri.bak 's/ *#? *Port +[0-9]+/Port '${SSH_PORT}'/g' /etc/ssh/sshd_config
 
 # first user && group
 
-USER_DEFAULT=cxd
+USER_DEFAULT=aaa
 read -p "First user (${USER_DEFAULT}) or press Ctrl+C to exit: " SUDO_USER
 SUDO_USER=${SUDO_USER%% *}
 SUDO_USER=${SUDO_USER:-${USER_DEFAULT}}

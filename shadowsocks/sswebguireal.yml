@@ -11,10 +11,6 @@ plugins:
     use: true
   account:
     use: true
-  macAccount:
-    use: true
-  group:
-    use: true
   email:
     use: true
   webgui:
@@ -23,3 +19,9 @@ plugins:
     port: '11180'
 
 db: 'sswebgui.sqlite'
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: '${REDIS_PASSWORD}'
+  db: 0
