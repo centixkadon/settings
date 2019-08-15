@@ -1,0 +1,55 @@
+#!/bin/bash
+
+DIR=$(cd $(dirname $0); pwd)
+. ${DIR}/initial
+
+
+# config git
+
+read -p "input git email: " GIT_EMAIL
+read -p "input git name: " GIT_NAME
+git config --global user.email "${GIT_EMAIL}"
+git config --global user.name "${GIT_NAME}"
+logging info "git config done"
+
+
+# server security
+
+sudo apt install denyhosts
+logging warning "change ADMIN_EMAIL in /etc/denyhosts.conf"
+pause
+sudo systemctl restart denyhosts
+
+
+# centixkadon.github.io
+
+rm -rf ${GITHUB_PATH}/centixkadon/centixkadon.github.io
+git clone https://centixkadon@github.com/centixkadon/centixkadon.github.io.git ${GITHUB_PATH}/centixkadon/centixkadon.github.io
+logging info "Repository centixkadon.github.io cloned"
+
+
+# apache2
+
+sudo apt install apache2 python3-certbot-apache
+logging warning "change ServerName, DocumentRoot in /etc/apache2/sites-available/000-default.conf"
+logging warning "change <Directory> in /etc/apache2/apache2.conf"
+logging warning "change ErrorDocument in /etc/apache2/conf-available/localized-error-pages.conf"
+logging warning "change Alias & <Directory> in /etc/apache2/conf-available/javascript-common.conf"
+pause
+sudo systemctl reload apache2
+
+read -p "config apache2 domain or press Enter to skip: " DOMAIN
+if [[ ${DOMAIN} != "" ]]
+then
+  sudo certbot --apache -d ${DOMAIN}
+  logging info "Server certificate get"
+fi
+
+
+# copy scripts
+
+ln -sf ${SETTINGS_PATH}/linux/scripts ~/All/scripts
+cd ~/All/scripts
+sudo ln -sf ~/All/scripts/who-the-hell-is-using-the-server /usr/bin/who-the-hell-is-using-the-server
+sudo ln -sf ~/All/scripts/who-the-hell-is-using-the-nvidia /usr/bin/who-the-hell-is-using-the-nvidia
+logging info "scripts copied"

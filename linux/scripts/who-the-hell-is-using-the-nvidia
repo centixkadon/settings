@@ -19,6 +19,7 @@ PROCESSES=$(nvidia-smi)
 PROCESSES_HEAD_1=$(head -n 17 <<< ${PROCESSES})
 PROCESSES_HEAD_2=$(head -n 1 <<< $(tail -n +18 <<< ${PROCESSES}))
 PROCESSES_TAIL=$(tail -n 1 <<< ${PROCESSES})
+
 PROCESSES=$(tail -n +19 <<< $(head -n -1 <<< ${PROCESSES}))
 PROCESSES=$(sort <<< ${PROCESSES})
 

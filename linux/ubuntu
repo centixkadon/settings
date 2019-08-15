@@ -1,0 +1,75 @@
+#!/bin/bash
+# Download this script using bash:
+#   curl -O https://raw.githubusercontent.com/centixkadon/settings/master/linux/ubuntu && bash ubuntu
+
+DIR=$(cd $(dirname $0); pwd)
+function logging() {
+  echo $(echo -e "\033[1;32m")"$(date '+%Y-%m-%d %H:%M:%S') [INFO    ] $@"$(echo -e "\033[0m")
+}
+
+
+if [ "$(whoami)" == "root" ]
+then # setup as root
+
+chmod +x ${DIR}/ubuntu
+
+
+# update && upgrade
+
+apt update
+apt upgrade --fix-missing
+apt install bash-completion vim build-essential python3-pip git screen
+
+
+# ssh port
+
+SSH_PORT_DEFAULT=11122
+read -p "input ssh port (${SSH_PORT_DEFAULT}): " SSH_PORT
+SSH_PORT=${SSH_PORT%% *}
+SSH_PORT=${SSH_PORT%%.*}
+SSH_PORT=${SSH_PORT:-${SSH_PORT_DEFAULT}}
+logging "Set ssh port to ${SSH_PORT}"
+echo
+
+sed -ri.bak 's/ *#? *Port +[0-9]+/Port '${SSH_PORT}'/g' /etc/ssh/sshd_config
+systemctl restart ssh
+
+
+# admin user && user group
+
+USER_DEFAULT=aaa
+read -p "input sudo user (${USER_DEFAULT}) or press Ctrl+C to exit: " SUDO_USER
+SUDO_USER=${SUDO_USER%% *}
+SUDO_USER=${SUDO_USER:-${USER_DEFAULT}}
+logging "Setting user to ${SUDO_USER}"
+echo
+
+read -p "input group of the user (${SUDO_USER}) or press Ctrl+C to exit: " USER_GROUP
+USER_GROUP=${USER_GROUP%% *}
+USER_GROUP=${USER_GROUP:-${SUDO_USER}}
+logging "Setting group to ${USER_GROUP}"
+echo
+
+groupadd ${USER_GROUP}
+useradd -m -g ${USER_GROUP} -G sudo -s /bin/bash ${SUDO_USER}
+logging "Setting user password"
+passwd ${SUDO_USER}
+logging "User & group set"
+
+cp ${DIR}/ubuntu /home/${SUDO_USER}/ubuntu
+chown ${SUDO_USER}.${USER_GROUP} /home/${SUDO_USER}/ubuntu
+logging "Run ./ubuntu after login as sudo user"
+
+else # setup as sudo user
+
+# git clone
+
+GITHUB_PATH=~/All/git/github
+
+rm -rf ${GITHUB_PATH}
+git clone https://centixkadon@github.com/centixkadon/settings.git ${GITHUB_PATH}/centixkadon/settings
+logging "Repository settings cloned, setup server"
+
+bash ${GITHUB_PATH}/centixkadon/settings/linux/util/setup
+
+fi

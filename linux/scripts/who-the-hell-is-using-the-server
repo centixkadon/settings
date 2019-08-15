@@ -1,5 +1,10 @@
 #!/bin/bash
 
+BASHSIZE=$(stty size)
+LINES=${BASHSIZE% *}
+COLUMNS=${BASHSIZE#* }
+
+
 PROCESSES=$(nvidia-smi)
 PROCESSES=$(tail -n +19 <<< $(head -n -1 <<< ${PROCESSES}))
 PROCESSES=$(sort <<< ${PROCESSES})
@@ -16,9 +21,9 @@ done <<< ${PROCESSES}
 
 PROCESSES=$(ps -ef)
 PROCESSES_HEAD=$(head -n 1 <<< ${PROCESSES})
+
 PROCESSES=$(tail -n +2 <<< ${PROCESSES})
-# PROCESSES=$(grep pts <<< ${PROCESSES})
-PROCESSES=$(sort <<< ${PROCESSES})
+PROCESSES=$(sort -k 1,1 -k 6.6,6n -k 2,2n <<< ${PROCESSES})
 
 echo "GPU ${PROCESSES_HEAD}"
 while read PROCESS
@@ -32,6 +37,11 @@ do
   if [ "${PROCESS_CMD:0:6}" == "ps -ef" ]; then continue; fi
   PROCESS_GPU="   ${PROCESSES_GPUS[${PROCESS_PID}]}"
   PROCESS_GPU=${PROCESS_GPU:0-3}
-  echo "${PROCESS_GPU} ${PROCESS}"
+  if [ $((${#PROCESS} + 4 > ${COLUMNS})) == 1 ]
+  then
+    echo "${PROCESS_GPU} ${PROCESS:0:$((${COLUMNS} - 7))}..."
+  else
+    echo "${PROCESS_GPU} ${PROCESS}"
+  fi
 done <<< ${PROCESSES}
 
