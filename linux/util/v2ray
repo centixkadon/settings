@@ -1,0 +1,51 @@
+#!/bin/bash
+
+DIR=$(cd $(dirname $0); pwd)
+. ${DIR}/initial
+
+
+# install v2ray
+
+if false; then
+git clone https://github.com/v2ray/v2ray-core.git ${GITHUB_PATH}/v2ray/v2ray-core
+sudo bash ${GITHUB_PATH}/v2ray/v2ray-core/release/install-release.sh
+fi
+
+
+# config v2ray
+
+mkdir -p ${SETTINGS_PATH}/v2ray/test/clients
+export V2RAY_PORT V2RAY_WEBSOCKET_UUID
+export V2RAY_CLIENT_USER V2RAY_CLIENT_ID V2RAY_CLIENT_DELIMITER
+
+readVariable "v2ray port" V2RAY_PORT 11111
+setVariable "v2ray path" V2RAY_WEBSOCKET_PATH $(uuidgen)
+readVariable "v2ray server addr" V2RAY_SERVER_ADDR
+
+read -p "config v2ray server addr (${V2RAY_SERVER_ADDR_DEFAULT}): " V2RAY_SERVER_ADDR
+V2RAY_SERVER_ADDR=${V2RAY_SERVER_ADDR%% *}
+V2RAY_SERVER_ADDR=${V2RAY_SERVER_ADDR:-${V2RAY_SERVER_ADDR_DEFAULT}}
+logging info "Setting v2ray server addr to ${V2RAY_SERVER_ADDR_DEFAULT}"
+
+read -p "config number of v2ray clients: " V2RAY_NUM
+echo [ > ${SETTINGS_PATH}/v2ray/test/serverClients.json
+V2RAY_CLIENT_DELIMITER=,
+for ((i=0; i<${V2RAY_NUM}; ++i))
+do
+  read -p "config user of v2ray client $i: " V2RAY_CLIENT_USER
+  V2RAY_CLIENT_ID=$(uuidgen)
+  if [[ $(($i + 1)) == ${V2RAY_NUM} ]]
+  then
+    V2RAY_CLIENT_DELIMITER=
+  fi
+  ${DIR}/format ${SETTINGS_PATH}/v2ray/serverClient.json - >> ${SETTINGS_PATH}/v2ray/test/serverClients.json
+  ${DIR}/format ${SETTINGS_PATH}/v2ray/client.json - >> ${SETTINGS_PATH}/v2ray/test/clients/config.json
+done
+echo "        ]" >> ${SETTINGS_PATH}/v2ray/test/serverClients.json
+${DIR}/format ${SETTINGS_PATH}/v2ray/server.json ${SETTINGS_PATH}/v2ray/test/server.json
+# sudo ${DIR}/format ${SETTINGS_PATH}/v2ray/test/server.json /etc/v2ray/config.json -f V2RAY_CLIENTS=${SETTINGS_PATH}/v2ray/test/serverClients.json
+logging info "Copy config.json to /etc/v2ray/config.json"
+
+
+# sudo systemctl restart v2ray
+# logging info "Config v2ray done"
