@@ -1,0 +1,111 @@
+{
+  "log": {
+    "_access": "",
+    "_error": "",
+    "loglevel": "warning"
+  },
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {},
+      "tag": "direct"
+    },
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": null,
+            "port": 443,
+            "users": [
+              {
+                "id": null,
+                "alterId": 1024,
+                "security": "auto",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "wsSettings": {
+          "path": null
+        },
+        "tlsSettings": {}
+      },
+      "tag": "vmess"
+    },
+    {
+      "protocol": "freedom",
+      "settings": {},
+      "tag": "test"
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {},
+      "tag": "block"
+    }
+  ],
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": null,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": false,
+        "ip": "127.0.0.1"
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      },
+      "tag": "gfwlist"
+    }
+  ],
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "geoip:private"
+        ],
+        "inboundTag": "gfwlist",
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:category-ads"
+        ],
+        "inboundTag": "gfwlist",
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "geoip:cn"
+        ],
+        "inboundTag": "gfwlist",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "domain:v2ray.com",
+          "geosite:google",
+          "geosite:facebook"
+        ],
+        "inboundTag": "gfwlist",
+        "outboundTag": "vmess"
+      }
+    ]
+  }
+}

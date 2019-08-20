@@ -45,14 +45,30 @@ pause() {
 
 setVariable() {
   eval $2=$3
-  logging info "Set $(color white $1) to $(color cyan ${!2})"
+  logging info "set $(color white $1) to $(color cyan ${!2})"
 }
 
 readVariable() {
-  if $?
-  read -p "Input $(color white $1) ($3): " $2
+  VAR_DEFAULT=
+  if [[ $# == 3 ]]
+  then
+    VAR_DEFAULT=" (default: $(color cyan $3))"
+  fi
+  read -p "input $(color white $1)${VAR_DEFAULT}: " $2
   eval $2=${!2%% *}
   setVariable "$1" $2 ${!2:-$3}
+}
+
+gitClone() {
+  if [[ -e $2 && $1 == $(cd $2; git config --get remote.origin.url) ]]
+  then
+    pushd $2
+    git pull
+    popd
+  else
+    rm -rf $2
+    git clone $1 $2
+  fi
 }
 
 stty erase ^H

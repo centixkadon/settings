@@ -36,7 +36,8 @@ logging warning "change <Directory> in /etc/apache2/apache2.conf"
 logging warning "change ErrorDocument in /etc/apache2/conf-available/localized-error-pages.conf"
 logging warning "change Alias & <Directory> in /etc/apache2/conf-available/javascript-common.conf"
 pause
-sudo systemctl reload apache2
+sudo a2enmod headers proxy proxy_wstunnel
+sudo systemctl restart apache2
 
 read -p "config apache2 domain or press Enter to skip: " DOMAIN
 if [[ ${DOMAIN} != "" ]]
