@@ -8,6 +8,15 @@
     {
       "listen": "127.0.0.1",
       "port": null,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
+      },
+      "tag": "v2ctl"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": null,
       "protocol": "vmess",
       "settings": {
         "clients": []
@@ -15,18 +24,10 @@
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-          "path": null
+          "path": "/"
         }
-      }
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": null,
-      "protocol": "dokodemo-door",
-      "settings": {
-        "address": "127.0.0.1"
       },
-      "tag": "v2ctl"
+      "tag": "vmess"
     }
   ],
   "outbounds": [
@@ -40,8 +41,9 @@
       "tag": "blocked"
     }
   ],
+  "reverse": {},
   "routing": {
-    "domainStrategy": "AsIs",
+    "domainStrategy": "IPIfNonMatch",
     "rules": [
       {
         "type": "field",
@@ -52,8 +54,30 @@
       },
       {
         "type": "field",
+        "protocol": [
+          "bittorrent"
+        ],
+        "outboundTag": "blocked"
+      },
+      {
+        "type": "field",
         "ip": [
-          "geoip:private"
+          "geoip:private",
+          "geoip:cn"
+        ],
+        "inboundTag": [
+          "vmess"
+        ],
+        "outboundTag": "blocked"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:cn",
+          "geosite:speedtest"
+        ],
+        "inboundTag": [
+          "vmess"
         ],
         "outboundTag": "blocked"
       }

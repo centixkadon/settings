@@ -22,12 +22,15 @@ def update(d, key, value):
       v = v[k]
 
     k = ke.strip()
-    if k == "":
+    if isinstance(v, list) and k == "":
       v.append(value)
     else:
       if isinstance(v, list):
         k = int(k)
-      v[k] = value
+      if (isinstance(v, list) or (isinstance(v, dict) and k in v)) and isinstance(v[k], dict) and isinstance(value, dict):
+        v[k].update(value)
+      else:
+        v[k] = value
 
 
 def config(*, source, destination, keys, values, **kwargs):
@@ -57,6 +60,7 @@ def config(*, source, destination, keys, values, **kwargs):
         value = json.loads(value)
     update(d, key, value)
 
+  os.makedirs(os.path.split(destination)[0], exist_ok=True)
   with open(destination, "w", encoding="utf-8") as f:
     json.dump(d, f, indent=2)
 

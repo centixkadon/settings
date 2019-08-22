@@ -44,7 +44,7 @@ pause() {
 }
 
 setVariable() {
-  eval $2=$3
+  eval $2='"'"$3"'"'
   logging info "set $(color white $1) to $(color cyan ${!2})"
 }
 
@@ -55,8 +55,7 @@ readVariable() {
     VAR_DEFAULT=" (default: $(color cyan $3))"
   fi
   read -p "input $(color white $1)${VAR_DEFAULT}: " $2
-  eval $2=${!2%% *}
-  setVariable "$1" $2 ${!2:-$3}
+  setVariable "$1" $2 "${!2:-$3}"
 }
 
 gitClone() {

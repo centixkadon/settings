@@ -1,52 +1,19 @@
 {
   "log": {
-    "_access": "",
-    "_error": "",
+    "access": "log/access.log",
+    "error": "log/error.log",
     "loglevel": "warning"
   },
   "outbounds": [
     {
-      "protocol": "freedom",
-      "settings": {},
-      "tag": "direct"
-    },
-    {
-      "protocol": "vmess",
-      "settings": {
-        "vnext": [
-          {
-            "address": null,
-            "port": 443,
-            "users": [
-              {
-                "id": null,
-                "alterId": 1024,
-                "security": "auto",
-                "level": 0
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "security": "tls",
-        "wsSettings": {
-          "path": null
-        },
-        "tlsSettings": {}
-      },
-      "tag": "vmess"
-    },
-    {
-      "protocol": "freedom",
-      "settings": {},
-      "tag": "test"
-    },
-    {
       "protocol": "blackhole",
       "settings": {},
       "tag": "block"
+    },
+    {
+      "protocol": "freedom",
+      "settings": {},
+      "tag": "direct"
     }
   ],
   "inbounds": [
@@ -67,8 +34,27 @@
         ]
       },
       "tag": "gfwlist"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": null,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": false,
+        "ip": "127.0.0.1"
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      },
+      "tag": "all"
     }
   ],
+  "reverse": {},
   "routing": {
     "domainStrategy": "AsIs",
     "rules": [
@@ -77,7 +63,10 @@
         "ip": [
           "geoip:private"
         ],
-        "inboundTag": "gfwlist",
+        "inboundTag": [
+          "gfwlist",
+          "all"
+        ],
         "outboundTag": "block"
       },
       {
@@ -85,7 +74,9 @@
         "domain": [
           "geosite:category-ads"
         ],
-        "inboundTag": "gfwlist",
+        "inboundTag": [
+          "gfwlist"
+        ],
         "outboundTag": "block"
       },
       {
@@ -93,17 +84,69 @@
         "ip": [
           "geoip:cn"
         ],
-        "inboundTag": "gfwlist",
+        "inboundTag": [
+          "gfwlist",
+          "all"
+        ],
         "outboundTag": "direct"
       },
       {
         "type": "field",
         "domain": [
-          "domain:v2ray.com",
-          "geosite:google",
-          "geosite:facebook"
+          "geosite:cn"
         ],
-        "inboundTag": "gfwlist",
+        "inboundTag": [
+          "gfwlist",
+          "all"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:adobe",
+          "geosite:amazon",
+          "geosite:apple",
+          "geosite:bestbuy",
+          "geosite:github",
+          "geosite:gitlab",
+          "geosite:jetbrains",
+          "geosite:microsoft",
+          "geosite:mozilla",
+          "geosite:netflix",
+          "geosite:oracle",
+          "geosite:python",
+          "geosite:ubuntu",
+          "geosite:yahoo",
+          "geosite:yandex"
+        ],
+        "inboundTag": [
+          "gfwlist"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:geolocation-!cn"
+        ],
+        "inboundTag": [
+          "gfwlist"
+        ],
+        "outboundTag": "vmess"
+      },
+      {
+        "type": "field",
+        "inboundTag": [
+          "gfwlist"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "inboundTag": [
+          "all"
+        ],
         "outboundTag": "vmess"
       }
     ]

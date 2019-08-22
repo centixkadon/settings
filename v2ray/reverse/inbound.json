@@ -1,0 +1,15 @@
+{
+  "listen": "127.0.0.1",
+  "port": null,
+  "protocol": "vmess",
+  "settings": {
+    "clients": []
+  },
+  "streamSettings": {
+    "network": "ws",
+    "wsSettings": {
+      "path": "/"
+    }
+  },
+  "tag": "reverse"
+}
