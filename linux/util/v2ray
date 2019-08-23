@@ -19,20 +19,20 @@ rm -rf ${V2RAY_TARGET}
 readVariable "v2ray server domain" V2RAY_SERVER_ADDR
 readVariable "v2ray v2ctl port" V2RAY_V2CTL_PORT $(($RANDOM + 10000))
 readVariable "v2ray vmess port" V2RAY_VMESS_PORT $(($RANDOM + 10000))
-setVariable "v2ray vmess path" V2RAY_VMESS_PATH /$(uuidgen)
+setVariable "v2ray vmess path" V2RAY_VMESS_PATH /$(uuidgen)/$(uuidgen)
 
 ${DIR}/config ${V2RAY_SOURCE}/server/config.json ${V2RAY_TARGET}/server/config.json -k inbounds.0.port -i ${V2RAY_V2CTL_PORT} -k inbounds.1.port -i ${V2RAY_VMESS_PORT} -k inbounds.1.settings.clients -j [] -k inbounds.1.streamSettings.wsSettings.path -s /
 
-readVariable "if add reverse support (y/n)" V2RAY_REVERSE n
-if [[ ${V2RAY_REVERSE} == y ]]
+readVariable "v2ray reverse portals" V2RAY_PORTALS
+V2RAY_PORTALS=(${V2RAY_PORTALS})
+if [[ ${#V2RAY_PORTALS[@]} != 0 ]]
 then
   readVariable "v2ray reverse port" V2RAY_REVERSE_PORT $(($RANDOM + 10000))
-  setVariable "v2ray reverse path" V2RAY_REVERSE_PATH /$(uuidgen)
+  setVariable "v2ray reverse path" V2RAY_REVERSE_PATH /$(uuidgen)/$(uuidgen)
   ${DIR}/config ${V2RAY_SOURCE}/reverse/inbound.json ${V2RAY_TARGET}/reverse/inbound.json -k port -i ${V2RAY_REVERSE_PORT}
   ${DIR}/config ${V2RAY_TARGET}/server/config.json ${V2RAY_TARGET}/server/config.json -k reverse.portals -j []
 
-  readVariable "v2ray reverse portals" V2RAY_PORTALS
-  for V2RAY_PORTAL in ${V2RAY_PORTALS}
+  for V2RAY_PORTAL in ${V2RAY_PORTALS[@]}
   do
     V2RAY_PORTAL_ID=$(uuidgen)
     ${DIR}/config ${V2RAY_SOURCE}/reverse/reverse.json ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/reverse.json -k tag -s ${V2RAY_PORTAL} -k domain -s ${V2RAY_PORTAL}.${V2RAY_PORTAL_ID}.${V2RAY_SERVER_ADDR}
@@ -46,13 +46,20 @@ then
   done
 fi
 
-readVariable "v2ray clients" V2RAY_CLIENTS
-for V2RAY_CLIENT in ${V2RAY_CLIENTS}
-do
-  setVariable "id of v2ray client ${V2RAY_CLIENT}" V2RAY_CLIENT_ID $(uuidgen)
+addClient() {
+  V2RAY_CLIENT=$1
+  V2RAY_CLIENT_ID=$2
   ${DIR}/config ${V2RAY_SOURCE}/client/client.json ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/client.json -k email -s ${V2RAY_CLIENT} -k id -s ${V2RAY_CLIENT_ID}
   ${DIR}/config ${V2RAY_TARGET}/server/config.json ${V2RAY_TARGET}/server/config.json -k inbounds.1.settings.clients. -F ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/client.json
   ${DIR}/config ${V2RAY_SOURCE}/client/outbound.json ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/outbound.json -k settings.vnext.0.address -s ${V2RAY_SERVER_ADDR} -k settings.vnext.0.users.0.id -s ${V2RAY_CLIENT_ID} -k streamSettings.wsSettings.path -s ${V2RAY_VMESS_PATH}
+}
+
+readVariable "v2ray clients" V2RAY_CLIENTS
+V2RAY_CLIENTS=(${V2RAY_CLIENTS})
+for V2RAY_CLIENT in ${V2RAY_CLIENTS[@]}
+do
+  setVariable "id of v2ray client ${V2RAY_CLIENT}" V2RAY_CLIENT_ID $(uuidgen)
+  addClient ${V2RAY_CLIENT} ${V2RAY_CLIENT_ID}
 
   V2RAY_CLIENT_PORT=1080
   V2RAY_CLIENT_PORT=$((${V2RAY_CLIENT_PORT} + 1))
@@ -61,13 +68,13 @@ do
   setVariable "allsite port of v2ray client ${V2RAY_CLIENT}" V2RAY_CLIENT_ALLPORT ${V2RAY_CLIENT_PORT}
   ${DIR}/config ${V2RAY_SOURCE}/client/config.json ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/config.json -k outbounds. -F ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/outbound.json -k inbounds.0.port -i ${V2RAY_CLIENT_GFWPORT} -k inbounds.1.port -i ${V2RAY_CLIENT_ALLPORT}
 
-  if [[ ${V2RAY_REVERSE} == y ]]
+  if [[ ${#V2RAY_PORTALS[@]} != 0 ]]
   then
-    readVariable "if client ${V2RAY_CLIENT} visit reverse portals (y/n)" V2RAY_CLIENT_REVERSE n
-    if [[ ${V2RAY_CLIENT_REVERSE} == y ]]
+    readVariable "reverse portals of client ${V2RAY_CLIENT}" V2RAY_CLIENT_PORTALS
+    V2RAY_CLIENT_PORTALS=(${V2RAY_CLIENT_PORTALS})
+    if [[ ${#V2RAY_CLIENT_PORTALS[@]} != 0 ]]
     then
-      readVariable "reverse portals of client ${V2RAY_CLIENT}" V2RAY_CLIENT_PORTALS
-      for V2RAY_CLIENT_PORTAL in ${V2RAY_CLIENT_PORTALS}
+      for V2RAY_CLIENT_PORTAL in ${V2RAY_CLIENT_PORTALS[@]}
       do
         V2RAY_CLIENT_PORT=$((${V2RAY_CLIENT_PORT} + 1))
         ${DIR}/config ${V2RAY_SOURCE}/client/inbound.json ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/inbound.json -k port -i ${V2RAY_CLIENT_PORT} -k tag -s ${V2RAY_CLIENT_PORTAL}
@@ -78,33 +85,32 @@ do
   fi
 done
 
-if [[ ${V2RAY_REVERSE} == y ]]
+if [[ ${#V2RAY_PORTALS[@]} != 0 ]]
 then
-  for V2RAY_PORTAL in ${V2RAY_PORTALS}
+  V2RAY_ADD_CLIENTS=${V2RAY_CLIENTS[@]}
+  for V2RAY_PORTAL in ${V2RAY_PORTALS[@]}
   do
     readVariable "user of v2ray bridge ${V2RAY_PORTAL}" V2RAY_CLIENT ${V2RAY_PORTAL}
-    if [[ "${V2RAY_CLIENTS} " != *"${V2RAY_CLIENT} "* ]]
+    if [[ "${V2RAY_ADD_CLIENTS} " != *"${V2RAY_CLIENT} "* ]]
     then
       setVariable "id of v2ray client ${V2RAY_CLIENT}" V2RAY_CLIENT_ID $(uuidgen)
-      ${DIR}/config ${V2RAY_SOURCE}/client/client.json ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/client.json -k email -s ${V2RAY_CLIENT} -k id -s ${V2RAY_CLIENT_ID}
-      ${DIR}/config ${V2RAY_TARGET}/server/config.json ${V2RAY_TARGET}/server/config.json -k inbounds.1.settings.clients. -F ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/client.json
-      ${DIR}/config ${V2RAY_SOURCE}/client/outbound.json ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/outbound.json -k settings.vnext.0.address -s ${V2RAY_SERVER_ADDR} -k settings.vnext.0.users.0.id -s ${V2RAY_CLIENT_ID} -k streamSettings.wsSettings.path -s ${V2RAY_VMESS_PATH}
+      addClient ${V2RAY_CLIENT} ${V2RAY_CLIENT_ID}
 
-      V2RAY_CLIENTS="${V2RAY_CLIENTS} ${V2RAY_CLIENT}"
+      V2RAY_ADD_CLIENTS="${V2RAY_ADD_CLIENTS} ${V2RAY_CLIENT}"
     fi
 
     V2RAY_CLIENT_PORT=1080
     V2RAY_CLIENT_PORT=$((${V2RAY_CLIENT_PORT} + 1))
-    setVariable "gfwlist port of v2ray client ${V2RAY_CLIENT}" V2RAY_CLIENT_GFWPORT ${V2RAY_CLIENT_PORT}
+    setVariable "gfwlist port of v2ray bridge ${V2RAY_CLIENT}" V2RAY_CLIENT_GFWPORT ${V2RAY_CLIENT_PORT}
     V2RAY_CLIENT_PORT=$((${V2RAY_CLIENT_PORT} + 1))
-    setVariable "allsite port of v2ray client ${V2RAY_CLIENT}" V2RAY_CLIENT_ALLPORT ${V2RAY_CLIENT_PORT}
+    setVariable "allsite port of v2ray bridge ${V2RAY_CLIENT}" V2RAY_CLIENT_ALLPORT ${V2RAY_CLIENT_PORT}
     ${DIR}/config ${V2RAY_SOURCE}/client/config.json ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/config.json -k outbounds. -F ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/outbound.json -k outbounds. -F ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/outbound.json -k inbounds.0.port -i ${V2RAY_CLIENT_GFWPORT} -k inbounds.1.port -i ${V2RAY_CLIENT_ALLPORT} -k reverse.bridges -j [] -k reverse.bridges. -F ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/reverse.json -k reverse.bridges.0.tag -s reverse -k routing.rules. -F ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/rule2.json -k routing.rules. -F ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/rule3.json
 
-    readVariable "if bridge ${V2RAY_PORTAL} visit reverse portals (y/n)" V2RAY_CLIENT_REVERSE n
-    if [[ ${V2RAY_CLIENT_REVERSE} == y ]]
+    readVariable "reverse portals of bridge ${V2RAY_PORTAL}" V2RAY_CLIENT_PORTALS
+    V2RAY_CLIENT_PORTALS=(${V2RAY_CLIENT_PORTALS})
+    if [[ ${#V2RAY_CLIENT_PORTALS[@]} != 0 ]]
     then
-      readVariable "reverse portals of bridge ${V2RAY_PORTAL}" V2RAY_CLIENT_PORTALS
-      for V2RAY_CLIENT_PORTAL in ${V2RAY_CLIENT_PORTALS}
+      for V2RAY_CLIENT_PORTAL in ${V2RAY_CLIENT_PORTALS[@]}
       do
         V2RAY_CLIENT_PORT=$((${V2RAY_CLIENT_PORT} + 1))
         ${DIR}/config ${V2RAY_SOURCE}/client/inbound.json ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/inbound.json -k port -i ${V2RAY_CLIENT_PORT} -k tag -s ${V2RAY_CLIENT_PORTAL}
@@ -127,15 +133,35 @@ logging info "copy config.json to /etc/v2ray/config.json"
 sudo cp ${V2RAY_TARGET}/server/config.json /etc/v2ray/config.json
 sudo systemctl restart v2ray.service
 
+V2RAY_DOWNLOAD=${SETTINGS_PATH}/v2ray/test/download
+rm -rf ${V2RAY_DOWNLOAD} ${V2RAY_DOWNLOAD}.zip
+mkdir -p ${V2RAY_DOWNLOAD}/clients
+mkdir -p ${V2RAY_DOWNLOAD}/bridges
+
+zip -q9j ${V2RAY_DOWNLOAD}/server.zip ${V2RAY_TARGET}/server/config.json
+for V2RAY_CLIENT in ${V2RAY_CLIENTS[@]}
+do
+  zip -q9j ${V2RAY_DOWNLOAD}/clients/${V2RAY_CLIENT}.zip ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/config.json
+done
+for V2RAY_PORTAL in ${V2RAY_PORTALS[@]}
+do
+  zip -q9j ${V2RAY_DOWNLOAD}/bridges/${V2RAY_PORTAL}.zip ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/config.json
+done
+pushd ${V2RAY_DOWNLOAD}/.. && zip -q0r download.zip download && popd
+logging info "download configuration files from ${V2RAY_DOWNLOAD}.zip"
+
 logging warning "config <Location> in /etc/apache2/sites-enabled/domain-le-ssl.conf"
 echo "# ==== /etc/apache2/sites-enabled/domain-le-ssl.conf"
 echo "<Location ${V2RAY_VMESS_PATH}>"
 echo "	ProxyPass ws://127.0.0.1:${V2RAY_VMESS_PORT}/ Upgrade=WebSocket"
 echo "</Location>"
-echo "<Location ${V2RAY_REVERSE_PATH}>"
-echo "	ProxyPass ws://127.0.0.1:${V2RAY_REVERSE_PORT}/ Upgrade=WebSocket"
-echo "</Location>"
-echo "# ==== /etc/apache2/sites-enabled/domain-le-ssl.conf"
+if [[ ${#V2RAY_PORTALS[@]} != 0 ]]
+then
+  echo "<Location ${V2RAY_REVERSE_PATH}>"
+  echo "	ProxyPass ws://127.0.0.1:${V2RAY_REVERSE_PORT}/ Upgrade=WebSocket"
+  echo "</Location>"
+  echo "# ==== /etc/apache2/sites-enabled/domain-le-ssl.conf"
+fi
 pause
 
 logging info "config v2ray done"
