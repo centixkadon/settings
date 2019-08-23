@@ -92,14 +92,14 @@ then
     ${DIR}/config ${V2RAY_SOURCE}/reverse/rule3.json ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/rule3.json -k inboundTag. -s reverse -k outboundTag -s direct
     ${DIR}/config ${V2RAY_TARGET}/server/config.json ${V2RAY_TARGET}/server/config.json -k reverse.portals. -F ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/reverse.json -k routing.rules. -F ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/rule1.json
 
-    ${DIR}/config ${V2RAY_SOURCE}/client/client.json ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/client.json -k email -s ${V2RAY_PORTAL} -k id -s ${V2RAY_PORTAL_ID}
+    ${DIR}/config ${V2RAY_SOURCE}/client/client.json ${V2RAY_TARGET}/reverse/${V2RAY_PORTAL}/client.json -k email -s ${V2RAY_PORTAL} -k id -s ${V2RAY_PORTAL_ID} -k alterId -i 1024
   done
 fi
 
 addClient() {
   V2RAY_CLIENT=$1
   V2RAY_CLIENT_ID=$2
-  ${DIR}/config ${V2RAY_SOURCE}/client/client.json ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/client.json -k email -s ${V2RAY_CLIENT} -k id -s ${V2RAY_CLIENT_ID}
+  ${DIR}/config ${V2RAY_SOURCE}/client/client.json ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/client.json -k email -s ${V2RAY_CLIENT} -k id -s ${V2RAY_CLIENT_ID} -k alterId -i 64
   ${DIR}/config ${V2RAY_TARGET}/server/config.json ${V2RAY_TARGET}/server/config.json -k inbounds.1.settings.clients. -F ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/client.json
   ${DIR}/config ${V2RAY_SOURCE}/client/outbound.json ${V2RAY_TARGET}/client/${V2RAY_CLIENT}/outbound.json -k settings.vnext.0.address -s ${V2RAY_SERVER_ADDR} -k settings.vnext.0.users.0.id -s ${V2RAY_CLIENT_ID} -k streamSettings.wsSettings.path -s ${V2RAY_VMESS_PATH}
 }
@@ -213,6 +213,7 @@ then
   echo "</Location>"
   echo "# ==== /etc/apache2/sites-enabled/domain-le-ssl.conf"
 fi
+sudo systemctl reload apache2.service
 pause
 
 sudo cp ${V2RAY_TARGET}/server/config.json /etc/v2ray/config.json
