@@ -33,7 +33,7 @@
           "tls"
         ]
       },
-      "tag": "gfwlist"
+      "tag": "gfw"
     },
     {
       "listen": "127.0.0.1",
@@ -60,32 +60,22 @@
     "rules": [
       {
         "type": "field",
-        "ip": [
-          "geoip:private"
-        ],
-        "inboundTag": [
-          "gfwlist",
-          "all"
-        ],
-        "outboundTag": "block"
-      },
-      {
-        "type": "field",
         "domain": [
           "geosite:category-ads"
         ],
         "inboundTag": [
-          "gfwlist"
+          "gfw"
         ],
         "outboundTag": "block"
       },
       {
         "type": "field",
         "ip": [
+          "geoip:private",
           "geoip:cn"
         ],
         "inboundTag": [
-          "gfwlist",
+          "gfw",
           "all"
         ],
         "outboundTag": "direct"
@@ -96,7 +86,7 @@
           "geosite:cn"
         ],
         "inboundTag": [
-          "gfwlist",
+          "gfw",
           "all"
         ],
         "outboundTag": "direct"
@@ -121,7 +111,7 @@
           "geosite:yandex"
         ],
         "inboundTag": [
-          "gfwlist"
+          "gfw"
         ],
         "outboundTag": "direct"
       },
@@ -131,14 +121,14 @@
           "geosite:geolocation-!cn"
         ],
         "inboundTag": [
-          "gfwlist"
+          "gfw"
         ],
         "outboundTag": "vmess"
       },
       {
         "type": "field",
         "inboundTag": [
-          "gfwlist"
+          "gfw"
         ],
         "outboundTag": "direct"
       },
