@@ -12,6 +12,7 @@ if [[ ${V2RAY_UPDATE} == y ]]
 then
   gitClone https://github.com/v2ray/v2ray-core.git ${GITHUB_PATH}/v2ray/v2ray-core
   sudo bash ${GITHUB_PATH}/v2ray/v2ray-core/release/install-release.sh
+  sudo apt install jq zip uuid-runtime
 fi
 
 
