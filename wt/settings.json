@@ -1,0 +1,142 @@
+{
+  "$schema": "https://aka.ms/terminal-profiles-schema",
+
+  "defaultProfile": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+  "launchMode": "maximized",
+  "copyOnSelect": false,
+  "copyFormatting": true,
+
+  "profiles": {
+    "defaults": {
+      "colorScheme": "Bootstrap",
+      "hidden": false
+    },
+    "list": [
+      {
+        "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+        "name": "Ubuntu",
+        "commandline": "ubuntu.exe",
+        "source": "Windows.Terminal.Wsl",
+        "icon": "%LocalAppData%/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/Square44x44Logo.altform-unplated_targetsize-256.png"
+      },
+      {
+        "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+        "name": "Windows PowerShell",
+        "commandline": "powershell.exe"
+      },
+      {
+        "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+        "name": "命令提示符",
+        "commandline": "cmd.exe"
+      },
+      {
+        "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+        "name": "Azure Cloud Shell",
+        "source": "Windows.Terminal.Azure"
+      },
+      {
+        "guid": "{e32f9f78-25ab-48ae-bacb-9a8629a348ec}",
+        "name": "eelab",
+        "commandline": "ssh.exe chenxudong@eelab-server"
+      }
+    ]
+  },
+
+  "schemes": [
+    {
+      "name": "Bootstrap",
+
+      "cursorColor": "#28A745",
+      "selectionBackground": "#5DAFFF",
+
+      "foreground": "#343A40",
+      "background": "#FFFFFF",
+
+      "black": "#343A40",
+      "red": "#DC3545",
+      "green": "#28A745",
+      "yellow": "#FFC107",
+      "blue": "#007BFF",
+      "purple": "#6F42C1",
+      "cyan": "#17A2B8",
+      "white": "#999C9F",
+      "brightBlack": "#343A40",
+      "brightRed": "#DC3545",
+      "brightGreen": "#28A745",
+      "brightYellow": "#FFC107",
+      "brightBlue": "#007BFF",
+      "brightPurple": "#6F42C1",
+      "brightCyan": "#17A2B8",
+      "brightWhite": "#999C9F"
+    }
+  ],
+
+  "keybindings": [
+    // Application-level Keys
+    { "command": "closeWindow", "keys": "alt+f4" },
+    { "command": "toggleFullscreen", "keys": "alt+enter" },
+    { "command": "toggleFullscreen", "keys": "f11" },
+    { "command": "openNewTabDropdown", "keys": "ctrl+shift+space" },
+    { "command": "openSettings", "keys": "ctrl+," },
+    { "command": { "action": "openSettings", "target": "defaultsFile" }, "keys": "alt+ctrl+," },
+    { "command": "find", "keys": "ctrl+shift+f" },
+
+    // Tab Management
+    { "command": "duplicateTab", "keys": "ctrl+shift+t" },
+    { "command": "duplicateTab", "keys": "ctrl+shift+d" },
+    { "command": { "action": "newTab", "index": 0 }, "keys": "ctrl+shift+1" },
+    { "command": { "action": "newTab", "index": 1 }, "keys": "ctrl+shift+2" },
+    { "command": { "action": "newTab", "index": 2 }, "keys": "ctrl+shift+3" },
+    { "command": { "action": "newTab", "index": 3 }, "keys": "ctrl+shift+4" },
+    { "command": { "action": "newTab", "index": 4 }, "keys": "ctrl+shift+5" },
+    { "command": { "action": "newTab", "index": 5 }, "keys": "ctrl+shift+6" },
+    { "command": { "action": "newTab", "index": 6 }, "keys": "ctrl+shift+7" },
+    { "command": { "action": "newTab", "index": 7 }, "keys": "ctrl+shift+8" },
+    { "command": { "action": "newTab", "index": 8 }, "keys": "ctrl+shift+9" },
+    { "command": { "action": "newTab", "profile": "Windows PowerShell" }, "keys": "ctrl+shift+0" },
+    { "command": "nextTab", "keys": "ctrl+tab" },
+    { "command": "prevTab", "keys": "ctrl+shift+tab" },
+
+    // Pane Management
+    { "command": { "action": "splitPane", "split": "auto", "splitMode": "duplicate" }, "keys": "alt+shift+t" },
+    { "command": { "action": "splitPane", "split": "auto", "splitMode": "duplicate" }, "keys": "alt+shift+d" },
+    { "command": { "action": "splitPane", "split": "horizontal" }, "keys": "alt+shift+-" },
+    { "command": { "action": "splitPane", "split": "vertical" }, "keys": "alt+shift+|" },
+    { "command": { "action": "splitPane", "split": "auto", "index": 0 }, "keys": "alt+shift+1" },
+    { "command": { "action": "splitPane", "split": "auto", "index": 1 }, "keys": "alt+shift+2" },
+    { "command": { "action": "splitPane", "split": "auto", "index": 2 }, "keys": "alt+shift+3" },
+    { "command": { "action": "splitPane", "split": "auto", "index": 3 }, "keys": "alt+shift+4" },
+    { "command": { "action": "splitPane", "split": "auto", "index": 4 }, "keys": "alt+shift+5" },
+    { "command": { "action": "splitPane", "split": "auto", "index": 5 }, "keys": "alt+shift+6" },
+    { "command": { "action": "splitPane", "split": "auto", "index": 6 }, "keys": "alt+shift+7" },
+    { "command": { "action": "splitPane", "split": "auto", "index": 7 }, "keys": "alt+shift+8" },
+    { "command": { "action": "splitPane", "split": "auto", "index": 8 }, "keys": "alt+shift+9" },
+    { "command": { "action": "splitPane", "split": "auto", "profile": "Windows PowerShell" }, "keys": "alt+shift+0" },
+    { "command": { "action": "moveFocus", "direction": "left" }, "keys": "alt+left" },
+    { "command": { "action": "moveFocus", "direction": "right" }, "keys": "alt+right" },
+    { "command": { "action": "moveFocus", "direction": "up" }, "keys": "alt+up" },
+    { "command": { "action": "moveFocus", "direction": "down" }, "keys": "alt+down" },
+    { "command": { "action": "resizePane", "direction": "left" }, "keys": "alt+shift+left" },
+    { "command": { "action": "resizePane", "direction": "right" }, "keys": "alt+shift+right" },
+    { "command": { "action": "resizePane", "direction": "up" }, "keys": "alt+shift+up" },
+    { "command": { "action": "resizePane", "direction": "down" }, "keys": "alt+shift+down" },
+    { "command": "closePane", "keys": "ctrl+shift+w" },
+
+    // Clipboard Integration
+    { "command": "copy", "keys": "ctrl+shift+c" },
+    { "command": "paste", "keys": "ctrl+shift+v" },
+    { "command": { "action": "copy", "singleLine": false }, "keys": "ctrl+c" },
+    { "command": "paste", "keys": "ctrl+v" },
+
+    // Scrollback
+    { "command": "scrollDown", "keys": "ctrl+shift+down" },
+    { "command": "scrollDownPage", "keys": "ctrl+shift+pgdn" },
+    { "command": "scrollUp", "keys": "ctrl+shift+up" },
+    { "command": "scrollUpPage", "keys": "ctrl+shift+pgup" },
+
+    // Visual Adjustments
+    { "command": { "action": "adjustFontSize", "delta": -1 }, "keys": "ctrl+[" },
+    { "command": { "action": "adjustFontSize", "delta": 1 }, "keys": "ctrl+]" },
+    { "command": "resetFontSize", "keys": "ctrl+0" }
+  ]
+}
