@@ -1,0 +1,13 @@
+{
+  "files.exclude": {
+    "**/bin": true,
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true
+  },
+  "java.import.gradle.arguments": "-Denv=testing",
+  "java.completion.overwrite": false,
+  "java.implementationsCodeLens.enabled": true,
+  "java.import.gradle.version": "4.10",
+}
