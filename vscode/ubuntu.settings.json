@@ -1,13 +1,18 @@
 {
   "files.exclude": {
+    ".gradle": true,
     "**/bin": true,
+    "**/build": true,
     "**/.classpath": true,
     "**/.project": true,
     "**/.settings": true,
     "**/.factorypath": true
   },
-  "java.import.gradle.arguments": "-Denv=testing",
+  "java.import.gradle.arguments": "-Denv=development -x test",
   "java.completion.overwrite": false,
   "java.implementationsCodeLens.enabled": true,
   "java.import.gradle.version": "4.10",
+  "java.format.settings.url": "/home/wj/All/git/github/centixkadon/settings/eclipse/styles.xml",
+  "java.format.settings.profile": "centixkadon",
+  "java.autobuild.enabled": false,
 }
