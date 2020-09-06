@@ -1,30 +1,43 @@
 {
-  "comments": {
-    "en": "abcdefghijklmnopqrstuvwxyz|",
-    "EN": "ABCDEFGHIJKLMNOPQRSTUVWXYZ|",
-    "zh": "口口口口口口口口口口口口| |",
-    "GR": "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ|ΕΘΠΡΣΦ",
-    "gr": "αβγδεζηθικλμνξοπρστυφχψω|ϵϑϖϱςϕ",
+  // abcdefghijklmnopqrstuvwxyz
+  // ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  // 口口口口口口口口口口口口| |
+  // ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ|ΕΘΠΡΣΦ
+  // αβγδεζηθικλμνξοπρστυφχψω|ϵϑϖϱςϕ
+  "[groovy]": {
+    "editor.tabSize": 4,
   },
-  "editor.tabSize": 2,
-  "editor.insertSpaces": true,
+  "[hive-sql]": {
+    "editor.tabSize": 4,
+    "editor.wordWrap": "off",
+  },
+  "[java]": {
+    "editor.tabSize": 4,
+    "editor.wordWrap": "off",
+  },
+  "[xml]": {
+    "editor.tabSize": 4,
+    "editor.formatOnSave": false,
+  },
+  // Text Editor
   "editor.detectIndentation": false,
-  "editor.fontFamily": "'Sarasa Mono SC', Consolas, 微软雅黑",
+  "editor.insertSpaces": true,
+  "editor.renderWhitespace": "boundary",
+  "editor.tabSize": 2,
   "editor.wordWrap": "on",
   "editor.wordWrapColumn": 120,
   "editor.wrappingIndent": "indent",
-  "editor.formatOnType": true,
+  // Text Editor - Font
+  "editor.fontFamily": "'Sarasa Mono SC', Consolas, 微软雅黑",
+  "editor.fontSize": 14,
+  // Text Editor - Formatting
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
-  "editor.renderWhitespace": "boundary",
+  "editor.formatOnType": true,
+  // Text Editor - Suggestions
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
   "editor.suggestSelection": "first",
-  "workbench.colorTheme": "Default Light+",
-  "window.restoreWindows": "all",
-  "window.newWindowDimensions": "maximized",
-  "window.title": "${dirty}${rootName}${separator}${rootPath}${separator}${activeEditorMedium}${separator}${appName}",
-  "window.zoomLevel": 0,
-  "files.encoding": "utf8",
-  "files.eol": "\n",
+  // Text Editor - Files
   "files.associations": {
     "cassert": "cpp",
     "cctype": "cpp",
@@ -128,18 +141,34 @@
     "xtree": "cpp",
     "xutility": "cpp",
   },
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.exclude": {
+    ".gradle": true,
+    "**/.classpath": true,
+    "**/.factorypath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/bin": true,
+    "**/build": true,
+  },
+  // Workbench - Appearance
+  "workbench.colorTheme": "Default Light+",
+  "workbench.iconTheme": "material-icon-theme",
+  // Window
+  "window.restoreWindows": "all",
+  "window.title": "${dirty}${rootName}${separator}${rootPath}${separator}${activeEditorMedium}${separator}${appName}",
+  "window.zoomLevel": 0,
+  // Window - New Window
+  "window.newWindowDimensions": "maximized",
+  // Features - Explorer
   "explorer.confirmDragAndDrop": false,
+  // Features - Terminal
+  "terminal.integrated.fontFamily": "'Cascadia Mono PL'",
+  // Application - Telemetry
   "telemetry.enableCrashReporter": false,
   "telemetry.enableTelemetry": false,
-  "git.ignoreMissingGitWarning": true,
-  "python.linting.enabled": true,
-  "python.linting.lintOnSave": true,
-  "python.linting.pylintEnabled": false,
-  "python.linting.flake8Enabled": false,
-  "python.linting.flake8Args": [
-    "--max-line-length=120",
-  ],
-  "python.formatting.provider": "none",
+  // Extensions
   "C_Cpp.default.cppStandard": "c++20",
   "C_Cpp.default.cStandard": "c11",
   "C_Cpp.clang_format_fallbackStyle": "{ AllowShortBlocksOnASingleLine: true, AllowShortCaseLabelsOnASingleLine: true, AllowShortFunctionsOnASingleLine: All, AllowShortIfStatementsOnASingleLine: true, AllowShortLoopsOnASingleLine: true, ColumnLimit: 0, Cpp11BracedListStyle: false, IndentWidth: 2, ContinuationIndentWidth: 2, ConstructorInitializerIndentWidth: 2, MaxEmptyLinesToKeep: 3, PointerAlignment: Middle, SpacesInContainerLiterals: true }",
@@ -149,8 +178,47 @@
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",
   ],
-  "html.format.wrapLineLength": 0,
-  "html.format.indentHandlebars": true,
-  "xmlTools.enforcePrettySelfClosingTagOnFormat": true,
   "markdown-table-formatter.delimiterRowPadding": "Single Space Always",
+  // Extensions - Git
+  "git.ignoreMissingGitWarning": true,
+  // Extensions - Git Graph
+  "git-graph.commitDetailsViewLocation": "Docked to Bottom",
+  // Extensions - HTML
+  "html.format.indentHandlebars": true,
+  "html.format.wrapLineLength": 0,
+  // Extensions - Java
+  "java.autobuild.enabled": false,
+  "java.completion.importOrder": [
+    "c",
+    "j",
+    "l",
+    "o",
+  ],
+  "java.completion.overwrite": false,
+  "java.implementationsCodeLens.enabled": true,
+  "java.imports.gradle.wrapper.checksums": [
+    { // 4.10.3
+      "sha256": "660ab018b8e319e9ae779fdb1b7ac47d0321bde953bf0eb4545f14952cfdcaa3",
+      "allowed": true,
+    },
+  ],
+  "java.project.importOnFirstTimeStartup": "automatic",
+  "java.refactor.renameFromFileExplorer": "autoApply",
+  "java.semanticHighlighting.enabled": true,
+  // Extensions - Material Icons
+  "material-icon-theme.hidesExplorerArrows": true,
+  "material-icon-theme.saturation": 0.75,
+  "material-icon-theme.showWelcomeMessage": false,
+  // Extensions - Python
+  "python.formatting.provider": "none",
+  "python.languageServer": "Microsoft",
+  "python.linting.enabled": true,
+  "python.linting.flake8Args": [
+    "--max-line-length=120",
+  ],
+  "python.linting.flake8Enabled": false,
+  "python.linting.lintOnSave": true,
+  "python.linting.pylintEnabled": false,
+  // Extensions - XML Tools Configuration
+  "xmlTools.enforcePrettySelfClosingTagOnFormat": true,
 }
