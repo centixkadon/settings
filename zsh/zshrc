@@ -2,7 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/wj/.oh-my-zsh"
+export ZSH="/home/${USER}/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -107,16 +107,17 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+alias ll="ls -alF"
 
 # WORDCHARS='*?_-.[]~=/&;!#$%^(){}<>'
 # WORDCHARS=' !"#$%&'"'"'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
 WORDCHARS='!"#$%&'"'"'()*+,-./:;<=>?@[\]^_`{|}~'
 WORDCHARS=${WORDCHARS/\//}
 WORDCHARS=${WORDCHARS/\,/}
-WORDCHARS=${WORDCHARS/\:/}
+# WORDCHARS=${WORDCHARS/\:/}
 WORDCHARS=${WORDCHARS/\;/}
 WORDCHARS=${WORDCHARS/\|/}
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="/home/wj/.sdkman"
-[[ -s "/home/wj/.sdkman/bin/sdkman-init.sh" ]] && source "/home/wj/.sdkman/bin/sdkman-init.sh"
+export SDKMAN_DIR="/home/${USER}/.sdkman"
+[[ -s "/home/${USER}/.sdkman/bin/sdkman-init.sh" ]] && source "/home/${USER}/.sdkman/bin/sdkman-init.sh"
