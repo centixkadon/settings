@@ -162,7 +162,9 @@
   // Window - New Window
   "window.newWindowDimensions": "maximized",
   // Features - Explorer
+  "explorer.autoReveal": "focusNoScroll",
   "explorer.confirmDragAndDrop": false,
+  "explorer.incrementalNaming": "smart",
   // Features - Terminal
   "terminal.integrated.fontFamily": "'Cascadia Mono PL'",
   // Application - Telemetry
