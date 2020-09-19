@@ -180,11 +180,10 @@
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",
   ],
-  "markdown-table-formatter.delimiterRowPadding": "Single Space Always",
   // Extensions - Git
   "git.ignoreMissingGitWarning": true,
   // Extensions - Git Graph
-  "git-graph.commitDetailsViewLocation": "Docked to Bottom",
+  "git-graph.commitDetailsView.location": "Docked to Bottom",
   // Extensions - HTML
   "html.format.indentHandlebars": true,
   "html.format.wrapLineLength": 0,
@@ -207,6 +206,8 @@
   "java.project.importOnFirstTimeStartup": "automatic",
   "java.refactor.renameFromFileExplorer": "autoApply",
   "java.semanticHighlighting.enabled": true,
+  // Extensions - Markdown Table Formatter
+  "markdown-table-formatter.delimiterRowPadding": "Single Space Always",
   // Extensions - Material Icons
   "material-icon-theme.hidesExplorerArrows": true,
   "material-icon-theme.saturation": 0.75,
