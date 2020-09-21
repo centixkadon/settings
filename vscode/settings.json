@@ -22,7 +22,7 @@
   // Text Editor
   "editor.detectIndentation": false,
   "editor.insertSpaces": true,
-  "editor.renderWhitespace": "boundary",
+  "editor.renderWhitespace": "trailing",
   "editor.tabSize": 2,
   "editor.wordWrap": "on",
   "editor.wordWrapColumn": 120,
@@ -33,6 +33,7 @@
   // Text Editor - Formatting
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "modifications",
   "editor.formatOnType": true,
   // Text Editor - Suggestions
   "editor.suggest.snippetsPreventQuickSuggestions": false,
@@ -222,6 +223,8 @@
   "python.linting.flake8Enabled": false,
   "python.linting.lintOnSave": true,
   "python.linting.pylintEnabled": false,
+  // Extensions - vscode-icons Configuration
+  "vsicons.dontShowNewVersionMessage": true,
   // Extensions - XML Tools Configuration
   "xmlTools.enforcePrettySelfClosingTagOnFormat": true,
 }
