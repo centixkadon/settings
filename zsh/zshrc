@@ -1,15 +1,14 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
+[[ -a /etc/motd ]] && cat /etc/motd
 
-# Path to your oh-my-zsh installation.
-export ZSH="${HOME}/.oh-my-zsh"
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-# ZSH_THEME="robbyrussell"
-ZSH_THEME="agnoster"
+[[ ! -d ${HOME}/.antigen ]] && git clone https://github.com/zsh-users/antigen.git ${HOME}/.antigen
+source ${HOME}/.antigen/antigen.zsh
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -22,7 +21,6 @@ ZSH_THEME="agnoster"
 
 # Uncomment the following line to use hyphen-insensitive completion.
 # Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
 HYPHEN_INSENSITIVE="true"
 
 # Uncomment the following line to disable bi-weekly auto-update checks.
@@ -47,7 +45,6 @@ HYPHEN_INSENSITIVE="true"
 # ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
 COMPLETION_WAITING_DOTS="true"
 
 # Uncomment the following line if you want to disable marking untracked files
@@ -67,32 +64,30 @@ HIST_STAMPS="yyyy-mm-dd"
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
-HISTSIZE=1048576
+# Load the oh-my-zsh's library
+antigen use oh-my-zsh
 
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(
-  autojump                              # j <folder>
-  bundler                               # completion
-  catimg                                # catimg <file>
-  colorize                              # ccat <file> [<file>...]; cless [less-options] <file> [<file>...]
-  command-not-found                     # enable zsh_command_not_found
-  emoji                                 # echo $emoji[<name>]; display_emoji [<group>]
-  emoji-clock                           # display current time in clock emoji
-  extract                               # extract <file>
-  gem                                   # completion
-  git                                   # completion
-  gitignore                             # gi list; gi [name]
-  gradle                                # completion
-  sudo                                  # press <esc>, <esc> to add sudo prefix
-  timer                                 # display command execution time
-  ubuntu                                # completion
-)
+# Bundles from the default repo (robbyrussell's oh-my-zsh)
+antigen bundle autojump                 # j <folder>
+antigen bundle command-not-found        # enable zsh_command_not_found
+antigen bundle extract                  # extract <file>
+antigen bundle gradle                   # completion
+antigen bundle sudo                     # press <esc>, <esc> to add sudo prefix
 
-source $ZSH/oh-my-zsh.sh
+# Syntax highlighting bundle
+antigen bundle zsh-users/zsh-autosuggestions
+antigen bundle zsh-users/zsh-completions
+antigen bundle zsh-users/zsh-syntax-highlighting
+antigen bundle zsh-users/zsh-history-substring-search
+
+# Load the theme
+antigen theme romkatv/powerlevel10k
+
+# Tell Antigen that you're done
+antigen apply
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # User configuration
 
@@ -121,15 +116,9 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias ll="ls -alF"
 
+HISTSIZE=1048576
+
 # WORDCHARS='*?_-.[]~=/&;!#$%^(){}<>'
 # WORDCHARS=' !"#$%&'"'"'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
-WORDCHARS='!"#$%&'"'"'()*+,-./:;<=>?@[\]^_`{|}~'
-WORDCHARS=${WORDCHARS/\//}
-WORDCHARS=${WORDCHARS/\,/}
-# WORDCHARS=${WORDCHARS/\:/}
-WORDCHARS=${WORDCHARS/\;/}
-WORDCHARS=${WORDCHARS/\|/}
-
-PROMPT='$(emoji-clock)'${PROMPT}
-
-[[ -a /etc/motd ]] && cat /etc/motd
+# WORDCHARS='!"#$%&'"'"'()*+,-./:;<=>?@[\]^_`{|}~'
+WORDCHARS='!"#$%&'"'"'()*+-.:<=>?@[\]^_`{}~'
