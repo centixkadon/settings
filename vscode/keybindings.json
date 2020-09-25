@@ -1,13 +1,5 @@
 [
   {
-    "key": "ctrl+tab",
-    "command": "workbench.action.nextEditorInGroup"
-  },
-  {
-    "key": "ctrl+shift+tab",
-    "command": "workbench.action.previousEditorInGroup"
-  },
-  {
     "key": "shift+alt+r",
     "command": "revealInExplorer",
     "when": "editorFocus"
@@ -20,5 +12,21 @@
     "key": "shift+alt+r",
     "command": "remote-wsl.revealInExplorer",
     "when": "!editorFocus && remoteName == 'wsl'"
+  },
+  {
+    "key": "ctrl+tab",
+    "command": "workbench.action.nextEditorInGroup"
+  },
+  {
+    "key": "ctrl+shift+tab",
+    "command": "workbench.action.previousEditorInGroup"
+  },
+  {
+    "key": "ctrl+shift+q",
+    "command": "workbench.action.quit"
+  },
+  {
+    "key": "ctrl+shift+r",
+    "command": "workbench.action.reloadWindow"
   },
 ]

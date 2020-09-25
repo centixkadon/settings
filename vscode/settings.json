@@ -23,10 +23,16 @@
   "editor.detectIndentation": false,
   "editor.insertSpaces": true,
   "editor.renderWhitespace": "trailing",
+  "editor.rulers": [
+    120,
+    160,
+  ],
   "editor.tabSize": 2,
   "editor.wordWrap": "on",
   "editor.wordWrapColumn": 120,
   "editor.wrappingIndent": "indent",
+  // Text Editor - Cursor
+  "editor.cursorSurroundingLines": 5,
   // Text Editor - Font
   "editor.fontFamily": "'Sarasa Mono SC', Consolas, 微软雅黑",
   "editor.fontSize": 14,
