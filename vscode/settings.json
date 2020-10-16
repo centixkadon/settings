@@ -162,6 +162,8 @@
   // Workbench - Appearance
   "workbench.colorTheme": "Default Light+",
   "workbench.iconTheme": "material-icon-theme",
+  // Workbench - Editor Management
+  "workbench.editor.pinnedTabSizing": "compact",
   // Window
   "window.restoreWindows": "all",
   "window.title": "${dirty}${rootName}${separator}${rootPath}${separator}${activeEditorMedium}${separator}${appName}",
@@ -219,9 +221,11 @@
   "material-icon-theme.hidesExplorerArrows": true,
   "material-icon-theme.saturation": 0.75,
   "material-icon-theme.showWelcomeMessage": false,
+  // Extensions - Pylance
+  "python.analysis.typeCheckingMode": "basic",
   // Extensions - Python
   "python.formatting.provider": "none",
-  "python.languageServer": "Microsoft",
+  "python.languageServer": "Pylance",
   "python.linting.enabled": true,
   "python.linting.flake8Args": [
     "--max-line-length=120",
