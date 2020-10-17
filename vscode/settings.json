@@ -237,4 +237,5 @@
   "vsicons.dontShowNewVersionMessage": true,
   // Extensions - XML Tools Configuration
   "xmlTools.enforcePrettySelfClosingTagOnFormat": true,
+  "liquid.format": true,
 }
