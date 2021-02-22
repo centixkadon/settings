@@ -1,4 +1,7 @@
+
+run-parts /etc/update-motd.d
 [[ -a /etc/motd ]] && cat /etc/motd
+screenfetch
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -69,6 +72,7 @@ antigen use oh-my-zsh
 
 # Bundles from the default repo (robbyrussell's oh-my-zsh)
 antigen bundle autojump                 # j <folder>
+antigen bundle command-not-found        # enable zsh_command_not_found
 antigen bundle extract                  # extract <file>
 antigen bundle sudo                     # press <esc>, <esc> to add sudo prefix
 

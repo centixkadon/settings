@@ -11,6 +11,10 @@
     "editor.tabSize": 4,
     "editor.wordWrap": "off",
   },
+  "[html]": {
+    "editor.formatOnSaveMode": "file",
+    "editor.defaultFormatter": "vscode.html-language-features",
+  },
   "[java]": {
     "editor.tabSize": 4,
     "editor.wordWrap": "off",
@@ -34,7 +38,7 @@
   // Text Editor - Cursor
   "editor.cursorSurroundingLines": 5,
   // Text Editor - Font
-  "editor.fontFamily": "'Sarasa Mono SC', Consolas, 微软雅黑",
+  "editor.fontFamily": "Sarasa Mono SC, Consolas, Microsoft YaHei",
   "editor.fontSize": 14,
   // Text Editor - Formatting
   "editor.formatOnPaste": true,
@@ -151,19 +155,26 @@
   "files.encoding": "utf8",
   "files.eol": "\n",
   "files.exclude": {
-    ".gradle": true,
+    // Eclipse
     "**/.classpath": true,
     "**/.factorypath": true,
     "**/.project": true,
     "**/.settings": true,
     "**/bin": true,
     "**/build": true,
+    // Gradle
+    ".gradle": true,
+    // Jekyll
+    "_site": true,
+    // Python
+    "**/__pycache__": true,
   },
   // Workbench - Appearance
   "workbench.colorTheme": "Default Light+",
   "workbench.iconTheme": "material-icon-theme",
   // Workbench - Editor Management
   "workbench.editor.pinnedTabSizing": "compact",
+  "workbench.editor.wrapTabs": true,
   // Window
   "window.restoreWindows": "all",
   "window.title": "${dirty}${rootName}${separator}${rootPath}${separator}${activeEditorMedium}${separator}${appName}",
@@ -207,7 +218,11 @@
   "java.completion.overwrite": false,
   "java.implementationsCodeLens.enabled": true,
   "java.imports.gradle.wrapper.checksums": [
-    { // 4.10.3
+    { // https://services.gradle.org/distributions/gradle-4.4.1-bin.zip
+      "sha256": "2cae31aaabe2b362438e10dce5538f9a554e183056485df883f45aee08a008e0",
+      "allowed": false
+    },
+    { // https://services.gradle.org/distributions/gradle-4.10.3-all.zip
       "sha256": "660ab018b8e319e9ae779fdb1b7ac47d0321bde953bf0eb4545f14952cfdcaa3",
       "allowed": true,
     },
@@ -216,7 +231,7 @@
   "java.refactor.renameFromFileExplorer": "autoApply",
   "java.semanticHighlighting.enabled": true,
   // Extensions - Markdown Table Formatter
-  "markdown-table-formatter.delimiterRowPadding": "Single Space Always",
+  "markdown-table-formatter.delimiterRowPadding": "None",
   // Extensions - Material Icons
   "material-icon-theme.hidesExplorerArrows": true,
   "material-icon-theme.saturation": 0.75,
