@@ -1,85 +1,81 @@
-// To view the default settings, hold "alt" while clicking on the "Settings" button.
-// For documentation on these settings, see: https://aka.ms/terminal-documentation
 {
+  "$help": "https://aka.ms/terminal-documentation",
   "$schema": "https://aka.ms/terminal-profiles-schema",
-
-  "defaultProfile": "{2c4de342-38b7-51cf-b940-2309a097f518}",
-  "useTabSwitcher": false,
+  //
+  // Startup
+  //
+  "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+  "startOnUserLogin": false,
+  "firstWindowPreference": "defaultProfile",
   "launchMode": "maximized",
+  "windowingBehavior": "useExisting",
+  "disabledProfileSources": [],
+  "startupActions": "",
+  //
+  // Interaction
+  //
   "copyOnSelect": false,
-  "copyFormatting": true,
-
-  "profiles": {
-    "defaults": {
-      "fontFace": "Cascadia Mono PL",
-      "cursorShape": "bar",
-      "hidden": false,
-      "altGrAliasing": false,
-      "colorScheme": "Bootstrap",
-      "historySize": 1048576
-    },
-    "list": [
-      {
-        "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
-        "name": "Ubuntu",
-        "commandline": "ubuntu.exe",
-        "source": "Windows.Terminal.Wsl",
-        "icon": "ms-appdata:///Local/logo/ubuntu.png"
-      },
-      {
-        "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-        "name": "PowerShell",
-        "source": "Windows.Terminal.PowershellCore"
-      },
-      {
-        "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
-        "name": "命令提示符",
-        "commandline": "cmd.exe"
-      },
-      {
-        "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
-        "name": "Windows PowerShell",
-        "commandline": "powershell.exe"
-      },
-      {
-        "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
-        "name": "Azure Cloud Shell",
-        "source": "Windows.Terminal.Azure"
-      }
-    ]
-  },
-
+  "copyFormatting": "all",
+  "trimBlockSelection": false,
+  "trimPaste": true,
+  "wordDelimiters": " /\\()\"'-:,.;<>~!@#$%^&*|+=[]{}?│",
+  "snapToGridOnResize": true,
+  "minimizeToNotificationArea": false,
+  "alwaysShowNotificationIcon": false,
+  "tabSwitcherMode": "disabled",
+  "focusFollowMouse": false,
+  "experimental.detectURLs": false,
+  "largePasteWarning": true,
+  "multiLinePasteWarning": true,
+  //
+  // Appearance
+  //
+  "language": "en-US",
+  "theme": "system",
+  "alwaysShowTabs": true,
+  "showTabsInTitlebar": true,
+  "useAcrylicInTabRow": false,
+  "showTerminalTitleInTitlebar": true,
+  "alwaysOnTop": false,
+  "tabWidthMode": "equal",
+  "disableAnimations": false,
+  "confirmCloseAllTabs": true,
+  //
+  // Color schemes
+  //
   "schemes": [
     {
       "name": "Bootstrap",
-  
+      //
       "cursorColor": "#343a40",
-
+      //
       "background": "#ffffff",
       "foreground": "#343a40",
       "black": "#ffffff",
       "white": "#343a40",
       "brightBlack": "#c7c4c2",
       "brightWhite": "#6c757d",
-
+      //
       "red": "#dc3545",
       "yellow": "#ffc107",
       "green": "#28a745",
       "cyan": "#17a2b8",
       "blue": "#007bff",
       "purple": "#6f42c1",
-
+      //
       "brightRed": "#dc3545",
       "brightYellow": "#ffc107",
       "brightGreen": "#28a745",
       "brightCyan": "#17a2b8",
       "brightBlue": "#007bff",
       "brightPurple": "#6f42c1",
-
+      //
       "selectionBackground": "#5dafff"
     }
   ],
-
+  //
+  // Custom actions
+  //
   "actions": [
     // Application
     { "command": "closeWindow", "keys": "alt+f4" },
@@ -163,5 +159,85 @@
 
     // Command Palette
     { "name": null, "command": "commandPalette", "keys": "ctrl+shift+p" }
-  ]
+  ],
+  //
+  // Profile
+  //
+  "profiles": {
+    "defaults": {
+      //
+      // General
+      //
+      "hidden": false,
+      //
+      // Appearance
+      //
+      // Text
+      "colorScheme": "Bootstrap",
+      "font": {
+        "face": "Cascadia Mono",
+        "size": 12,
+        "weight": "normal"
+      },
+      "intenseTextStyle": "bold",
+      // Cursor
+      "cursorShape": "bar",
+      // Transparency
+      "opacity": 100,
+      "useAcrylic": false,
+      // Window
+      "padding": "8, 8, 8, 8",
+      "scrollbarState": "visible",
+      // Color
+      "adjustIndistinguishableColors": true,
+      //
+      // Advanced
+      //
+      "altGrAliasing": false,
+      "historySize": 1048576
+    },
+    "list": [
+      {
+        "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+        "name": "PowerShell",
+        "source": "Windows.Terminal.PowershellCore"
+      },
+      {
+        "guid": "{2ece5bfe-50ed-5f3a-ab87-5cd4baafed2b}",
+        "name": "Git Bash",
+        "source": "Git"
+      },
+      {
+        "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+        "name": "Ubuntu",
+        "commandline": "ubuntu.exe",
+        "source": "Windows.Terminal.Wsl",
+        "icon": "ms-appdata:///Local/logo/ubuntu.png"
+      },
+      {
+        "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+        "name": "命令提示符"
+      },
+      {
+        "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+        "name": "Windows PowerShell"
+      },
+      {
+        "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+        "name": "Azure Cloud Shell",
+        "source": "Windows.Terminal.Azure"
+      },
+      {
+        "guid": "{2e72fc2f-593c-5cdf-9cf7-b6ae1a521286}",
+        "name": "Developer Command Prompt for VS 2019",
+        "source": "Windows.Terminal.VisualStudio"
+      },
+      {
+        "guid": "{26089b3c-49d1-53d4-b288-eb4736fe0751}",
+        "name": "Developer PowerShell for VS 2019",
+        "source": "Windows.Terminal.VisualStudio"
+      }
+    ]
+  },
+  "$end": null
 }
