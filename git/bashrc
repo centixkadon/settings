@@ -38,8 +38,28 @@ sync_config() {
   fi
 }
 
+sync_git_config() {
+  if [[ "$3" != $(git config "$1" "$2") ]]
+  then
+    echo "git config $1 $2 $3"
+    git config "$1" "$2" "$3"
+  else
+    echo "git config $1 $2 not change"
+  fi
+}
 
 
+
+for GIT_HOST_DIR in $(ls -p1 ~/All/git)
+do
+  if [[ "${GIT_HOST_DIR}" =~ .+/ ]]
+  then
+    GIT_HOST_DIR=${GIT_HOST_DIR%/}
+    GIT_HOST_DIR_UPPER=${GIT_HOST_DIR^^}
+    storage_add STORAGE_GIT_${GIT_HOST_DIR_UPPER}_USER_NAME "git config ${GIT_HOST_DIR} user.name"
+    storage_add STORAGE_GIT_${GIT_HOST_DIR_UPPER}_USER_EMAIL "git config ${GIT_HOST_DIR} user.email"
+  fi
+done
 storage_add STORAGE_HTTP_PROXY "http proxy[:port]"
 storage_add STORAGE_HTTP_PROXY_USER "http proxy user"
 storage_add STORAGE_HTTP_PROXY_PASSWORD "http proxy password"
@@ -47,20 +67,40 @@ storage_add STORAGE_HTTP_PROXY_PASSWORD "http proxy password"
 if [ -e ~/.settings_storage ]
 then
   source ~/.settings_storage
-else
-  for STORAGE_KEY in "${STORAGE_KEYS[@]}"
-  do
+fi
+
+for STORAGE_KEY in "${STORAGE_KEYS[@]}"
+do
+  if [ ! -v ${STORAGE_KEY} ]
+  then
     STORAGE_PROMPT=${STORAGE_PROMPTS[${STORAGE_KEY}]}
     read -p "${STORAGE_PROMPT}: " "${STORAGE_KEY}"
-  done
-
-  sync_config print_settings_storage ~/.settings_storage
-fi
+  fi
+done
 
 storage_show
 
 
 
-export HTTP_PROXY_PASSWORD=${STORAGE_HTTP_PROXY_PASSWORD}
+sync_config print_settings_storage ~/.settings_storage
+
+for GIT_HOST_DIR in $(ls -p1 ~/All/git)
+do
+  if [[ "${GIT_HOST_DIR}" =~ .+/ ]]
+  then
+    GIT_HOST_DIR=${GIT_HOST_DIR%/}
+    GIT_HOST_DIR_UPPER=${GIT_HOST_DIR^^}
+    GIT_HOST_PATHSTR='~'/All/git/${GIT_HOST_DIR}
+    GIT_HOST_CONFIGSTR='~'/All/git/${GIT_HOST_DIR}/.gitconfig
+    GIT_HOST_CONFIG=~/All/git/${GIT_HOST_DIR}/.gitconfig
+    GIT_VAR_USER_NAME=STORAGE_GIT_${GIT_HOST_DIR_UPPER}_USER_NAME
+    GIT_VAR_USER_EMAIL=STORAGE_GIT_${GIT_HOST_DIR_UPPER}_USER_EMAIL
+    sync_git_config --global "includeIf.gitdir/i:${GIT_HOST_PATHSTR}/.path" "${GIT_HOST_CONFIGSTR}"
+    sync_git_config --file="${GIT_HOST_CONFIG}" user.name "${!GIT_VAR_USER_NAME}"
+    sync_git_config --file="${GIT_HOST_CONFIG}" user.email "${!GIT_VAR_USER_EMAIL}"
+  fi
+done
 
 sync_config print_ssh_config ~/.ssh/config
+
+export HTTP_PROXY_PASSWORD=${STORAGE_HTTP_PROXY_PASSWORD}
