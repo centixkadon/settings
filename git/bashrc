@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+declare -a STORAGE_KEYS
+declare -A STORAGE_PROMPTS
+
+storage_add() {
+  STORAGE_KEYS+=($1)
+  STORAGE_PROMPTS[${STORAGE_KEYS[-1]}]=$2
+}
+
+storage_show() {
+  for STORAGE_KEY in "${STORAGE_KEYS[@]}"
+  do
+    STORAGE_PROMPT=${STORAGE_PROMPTS[${STORAGE_KEY}]}
+    echo "${STORAGE_KEY}(${STORAGE_PROMPT}): ${!STORAGE_KEY}"
+  done
+}
+
+print_settings_storage() {
+  for STORAGE_KEY in "${STORAGE_KEYS[@]}"
+  do
+    echo "${STORAGE_KEY}=${!STORAGE_KEY}"
+  done
+}
+
+print_ssh_config() {
+  echo "Host *"
+  echo "ProxyCommand connect -H ${STORAGE_HTTP_PROXY_USER}@${STORAGE_HTTP_PROXY} %h %p"
+}
+
+sync_config() {
+  if [ ! -e "$2" ] || [[ $($1) != $(cat "$2") ]]
+  then
+    echo "$1 $2 sync"
+    $1 > "$2"
+  else
+    echo "$1 $2 not change"
+  fi
+}
+
+
+
+storage_add STORAGE_HTTP_PROXY "http proxy[:port]"
+storage_add STORAGE_HTTP_PROXY_USER "http proxy user"
+storage_add STORAGE_HTTP_PROXY_PASSWORD "http proxy password"
+
+if [ -e ~/.settings_storage ]
+then
+  source ~/.settings_storage
+else
+  for STORAGE_KEY in "${STORAGE_KEYS[@]}"
+  do
+    STORAGE_PROMPT=${STORAGE_PROMPTS[${STORAGE_KEY}]}
+    read -p "${STORAGE_PROMPT}: " "${STORAGE_KEY}"
+  done
+
+  sync_config print_settings_storage ~/.settings_storage
+fi
+
+storage_show
+
+
+
+export HTTP_PROXY_PASSWORD=${STORAGE_HTTP_PROXY_PASSWORD}
+
+sync_config print_ssh_config ~/.ssh/config
