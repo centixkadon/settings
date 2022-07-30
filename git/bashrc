@@ -24,12 +24,14 @@ print_settings_storage() {
 }
 
 print_ssh_config() {
-  echo "Host *"
+  echo "Host *.com"
   echo "ProxyCommand connect -H ${STORAGE_HTTP_PROXY_USER}@${STORAGE_HTTP_PROXY} %h %p"
 }
 
 sync_config() {
-  if [ ! -e "$2" ] || [[ $($1) != $(cat "$2") ]]
+  local SOURCE_STR=$($1)
+  local TARGET_STR=$(cat "$2")
+  if [ ! -e "$2" ] || [[ "${SOURCE_STR}" != "${TARGET_STR}" ]]
   then
     echo "$1 $2 sync"
     $1 > "$2"
